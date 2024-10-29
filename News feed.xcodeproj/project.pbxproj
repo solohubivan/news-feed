@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		223165182CBFFEE80009555D /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 223165172CBFFEE80009555D /* SnapKit */; };
+		228D84AA2CCFE07B007E001E /* FeedKit in Frameworks */ = {isa = PBXBuildFile; productRef = 228D84A92CCFE07B007E001E /* FeedKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				223165182CBFFEE80009555D /* SnapKit in Frameworks */,
+				228D84AA2CCFE07B007E001E /* FeedKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +87,7 @@
 			packageProductDependencies = (
 				223165172CBFFEE80009555D /* SnapKit */,
 				223165192CBFFEE80009555D /* SnapKit-Dynamic */,
+				228D84A92CCFE07B007E001E /* FeedKit */,
 			);
 			productName = "News feed";
 			productReference = 223C2E592CBFC4E700A6E75A /* News feed.app */;
@@ -116,6 +119,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				223165162CBFFEE80009555D /* XCRemoteSwiftPackageReference "SnapKit" */,
+				228D84A82CCFE07B007E001E /* XCRemoteSwiftPackageReference "FeedKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 223C2E5A2CBFC4E700A6E75A /* Products */;
@@ -357,6 +361,14 @@
 				minimumVersion = 5.7.1;
 			};
 		};
+		228D84A82CCFE07B007E001E /* XCRemoteSwiftPackageReference "FeedKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nmdias/FeedKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -369,6 +381,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 223165162CBFFEE80009555D /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = "SnapKit-Dynamic";
+		};
+		228D84A92CCFE07B007E001E /* FeedKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 228D84A82CCFE07B007E001E /* XCRemoteSwiftPackageReference "FeedKit" */;
+			productName = FeedKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

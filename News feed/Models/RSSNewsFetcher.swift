@@ -4,76 +4,116 @@
 //
 //  Created by Ivan Solohub on 22.10.2024.
 //
+
 import Foundation
+import FeedKit
 
-class RSSNewsFetcher: NSObject, XMLParserDelegate {
+class RSSNewsFetcher {
     
-    var newsItems: [NewsItem] = []
+    private var newsItems: [NewsItem] = []
     
-    private var currentElement = ""
-    private var currentTitle = ""
-    private var currentImageUrl = ""
-    private var currentDescription = ""
-
-    private var parserCompletionHandler: (() -> Void)?
-
-    func fetchNews(completionHandler: @escaping () -> Void) {
-        self.parserCompletionHandler = completionHandler
+    // MARK: - Public methods
+    
+    func getNewsItems() -> [NewsItem] {
+        return newsItems
+    }
+    
+    func fetchNews(from url: String, completion: @escaping () -> Void) {
+        guard let feedURL = URL(string: url) else {
+            completion()
+            return
+        }
         
-        let urlString = "https://www.reddit.com/.rss"
-        guard let url = URL(string: urlString) else { return }
+        let parser = FeedParser(URL: feedURL)
         
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print("Error: \(error)")
-                return
+        parser.parseAsync { [weak self] result in
+            switch result {
+            case .success(let feed):
+                self?.parseFeed(feed)
+                completion()
+            case .failure(_):
+                completion()
             }
+        }
+    }
+    
+    private func parseFeed(_ feed: Feed) {
+        newsItems = []
+        
+        if let rssFeed = feed.rssFeed {
+            for item in rssFeed.items ?? [] {
+                let title = item.title ?? "No title"
+                let sourceLink = item.link ?? ""
+                let datePublished = item.pubDate ?? Date()
+                let description = item.description ?? ""
+                
+                let imageUrl = extractHighQualityImageUrl(from: item.media?.mediaContents ?? [], thumbnail: item.media?.mediaThumbnails ?? [], description: description)
+                
+                let sourceName = getSourceName(from: item)
+                
+                let newsItem = NewsItem(
+                    title: title,
+                    imageUrl: imageUrl,
+                    sourceName: sourceName,
+                    datePublished: datePublished,
+                    sourceLink: sourceLink
+                )
+                newsItems.append(newsItem)
+            }
+        } else {
             
-            guard let data = data else {
-                print("No data received")
-                return
-            }
-            
-            let parser = XMLParser(data: data)
-            parser.delegate = self
-            parser.parse()
+        }
+    }
+    
+    private func getSourceName(from item: RSSFeedItem) -> String {
+        if let feedSource = item.source?.value, !feedSource.isEmpty {
+            return feedSource.lowercased()
         }
         
-        task.resume()
+        if let link = item.link, let url = URL(string: link) {
+            return url.host?
+                .replacingOccurrences(of: "www.", with: "")
+                .components(separatedBy: ".")
+                .first?
+                .lowercased() ?? "unknown source"
+        }
+        
+        return "unknown source"
     }
 
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
-        currentElement = elementName
+    private func extractHighQualityImageUrl(from mediaContents: [MediaContent], thumbnail: [MediaThumbnail], description: String) -> String {
         
-        if currentElement == "media:thumbnail" {
-            if let url = attributeDict["url"] {
-                currentImageUrl = url
+        let sortedMediaContents = mediaContents.sorted { ($0.attributes?.width ?? 0) > ($1.attributes?.width ?? 0) }
+        for mediaContent in sortedMediaContents {
+            if let url = mediaContent.attributes?.url, URL(string: url) != nil {
+                return url
             }
         }
-    }
-
-    func parser(_ parser: XMLParser, foundCharacters string: String) {
-        switch currentElement {
-        case "title":
-            currentTitle += string
-        case "content":
-            currentDescription += string
-        default:
-            break
+        
+        let sortedThumbnails = thumbnail.sorted {
+            (Int($0.attributes?.width ?? "") ?? 0) > (Int($1.attributes?.width ?? "") ?? 0)
         }
-    }
-
-    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-        if elementName == "entry" {
-            let newsItem = NewsItem(title: currentTitle, imageUrl: currentImageUrl)
-            newsItems.append(newsItem)
-            currentTitle = ""
-            currentImageUrl = ""
-            currentDescription = ""
+        for thumbnail in sortedThumbnails {
+            if let url = thumbnail.attributes?.url, URL(string: url) != nil {
+                return url
+            }
         }
-    }
-
-    func parserDidEndDocument(_ parser: XMLParser) {
-        parserCompletionHandler?()
+        
+        let pattern = #"img src="([^"]+)""#
+        if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
+            let range = NSRange(location: 0, length: description.utf16.count)
+            if let match = regex.firstMatch(in: description, options: [], range: range) {
+                if let imageUrlRange = Range(match.range(at: 1), in: description) {
+                    var imageUrl = String(description[imageUrlRange])
+                    imageUrl = imageUrl.replacingOccurrences(of: "&amp;", with: "&")
+                    
+                    if URL(string: imageUrl) != nil {
+                        return imageUrl
+                    }
+                }
+            }
+        }
+        
+        return ""
     }
 }

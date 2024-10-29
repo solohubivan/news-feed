@@ -1,0 +1,86 @@
+//
+//  RSSAtomNewsFetcher.swift
+//  News feed
+//
+//  Created by Ivan Solohub on 29.10.2024.
+//
+
+import Foundation
+import FeedKit
+
+class RSSAtomNewsFetcher {
+
+    private var newsItems: [NewsItem] = []
+
+    // MARK: - Public methods
+
+    func getNewsItems() -> [NewsItem] {
+        return newsItems
+    }
+
+    func fetchNews(from url: String, completion: @escaping () -> Void) {
+        guard let feedURL = URL(string: url) else {
+            completion()
+            return
+        }
+            
+        let parser = FeedParser(URL: feedURL)
+
+        parser.parseAsync { [weak self] result in
+            switch result {
+            case .success(let feed):
+                self?.parseFeed(feed)
+                completion()
+            case .failure(_):
+                completion()
+            }
+        }
+    }
+
+    private func parseFeed(_ feed: Feed) {
+        newsItems = []
+
+        if let atomFeed = feed.atomFeed {
+            for entry in atomFeed.entries ?? [] {
+                let title = entry.title ?? "No title"
+                let sourceName = entry.authors?.first?.name ?? "Unknown Source"
+                let sourceLink = entry.links?.first?.attributes?.href ?? ""
+
+                let datePublished = entry.published ?? Date()
+
+                let content = entry.content?.value ?? ""
+                let imageUrl = extractImageUrl(from: content)
+
+                let newsItem = NewsItem(
+                    title: title,
+                    imageUrl: imageUrl,
+                    sourceName: sourceName,
+                    datePublished: datePublished,
+                    sourceLink: sourceLink
+                )
+                newsItems.append(newsItem)
+            }
+        } else {
+
+        }
+    }
+
+    private func extractImageUrl(from content: String) -> String {
+        let pattern = #"img src="([^"]+)""#
+        if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
+            let range = NSRange(location: 0, length: content.utf16.count)
+            if let match = regex.firstMatch(in: content, options: [], range: range) {
+                if let imageUrlRange = Range(match.range(at: 1), in: content) {
+                    var imageUrl = String(content[imageUrlRange])
+
+                    imageUrl = imageUrl.replacingOccurrences(of: "&amp;", with: "&")
+
+                    if URL(string: imageUrl) != nil {
+                        return imageUrl
+                    }
+                }
+            }
+        }
+        return ""
+    }
+}

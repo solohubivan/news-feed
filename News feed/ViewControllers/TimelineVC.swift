@@ -12,28 +12,51 @@ class TimelineVC: UIViewController {
     
     private var titleLabel = UILabel()
     private var separateLine = UIView()
-    private var newsFeedCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-
+    private var newsFeedTableView = UITableView()
+    
+    private let newsFeedCreator = NewsFeedCreator()
+    
+//    треба тягнути данні з моделі замість того щоб юзать лишній масив
+    private var newsItems: [NewsItem] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        fetchAndDisplayNews()
     }
     
+    // MARK: - Private methods
     
+    private func fetchAndDisplayNews() {
+        newsFeedCreator.fetchCombinedNews { [weak self] in
+            DispatchQueue.main.async {
+                self?.newsItems = self?.newsFeedCreator.getCombinedNewsItems() ?? []
+                self?.newsFeedTableView.reloadData()
+            }
+        }
+    }
 }
 
-// MARK: - UICollectionView properties
+// MARK: - UITableView delegates
 
-extension TimelineVC: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        2
+extension TimelineVC: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return newsItems.count
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TimelineCollectionViewCell", for: indexPath) as? NewsFeedCollectionCell else { return UICollectionViewCell() }
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "NewsFeedTableViewCell", for: indexPath) as? NewsFeedTableViewCellCreator else {
+            return UITableViewCell()
+        }
+                
+        let newsItem = newsItems[indexPath.row]
+        cell.configure(with: newsItem)
         return cell
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            tableView.deselectRow(at: indexPath, animated: true)
+        }
 }
 
 // MARK: - Setup UI
@@ -43,8 +66,7 @@ extension TimelineVC {
         view.backgroundColor = .greyBackGroundColor
         setupTitleLabel()
         setupSeparateLine()
-        setupNewsLineCollectionView()
-        
+        setupNewsFeedTableView()
         setupConstraints()
     }
     
@@ -61,16 +83,14 @@ extension TimelineVC {
         view.addSubview(separateLine)
     }
     
-    private func setupNewsLineCollectionView() {
-        let layout = UICollectionViewFlowLayout()
-        layout.itemSize = CGSize(width: view.frame.width, height: 400)
-        layout.minimumLineSpacing = 0
-        newsFeedCollectionView.setCollectionViewLayout(layout, animated: false)
-        newsFeedCollectionView.backgroundColor = .clear
-        newsFeedCollectionView.delegate = self
-        newsFeedCollectionView.dataSource = self
-        newsFeedCollectionView.register(NewsFeedCollectionCell.self, forCellWithReuseIdentifier: "TimelineCollectionViewCell")
-        view.addSubview(newsFeedCollectionView)
+    private func setupNewsFeedTableView() {
+        newsFeedTableView.dataSource = self
+                newsFeedTableView.delegate = self
+        newsFeedTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: "NewsFeedTableViewCell")
+                newsFeedTableView.backgroundColor = .clear
+        newsFeedTableView.separatorStyle = .singleLine
+        newsFeedTableView.separatorColor = .lightGray
+                view.addSubview(newsFeedTableView)
     }
     
     // MARK: - Setup Constraints
@@ -88,7 +108,7 @@ extension TimelineVC {
             maker.left.right.equalToSuperview()
         }
         
-        newsFeedCollectionView.snp.makeConstraints { maker in
+        newsFeedTableView.snp.makeConstraints { maker in
             maker.top.equalTo(separateLine.snp.bottom)
             maker.left.equalToSuperview()
             maker.right.equalToSuperview()

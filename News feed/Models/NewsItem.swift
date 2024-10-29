@@ -7,9 +7,11 @@
 import Foundation
 
 struct NewsItem {
-//    let dateCreated: Date
-//    let source: String
     let title: String
     let imageUrl: String
-//    let contentLink: String
+    let sourceName: String
+    let datePublished: Date
+    let sourceLink: String
+    
+    var isSaved: Bool = false
 }
