@@ -1,0 +1,103 @@
+//
+//  ShowFullNewsItemVC.swift
+//  News feed
+//
+//  Created by Ivan Solohub on 30.10.2024.
+//
+
+import UIKit
+import SnapKit
+import WebKit
+
+class ShowOnSourceNewsItemVC: UIViewController {
+    
+    private var backButton = UIButton()
+    private var saveButton = UIButton()
+    private var separateLine = UIView()
+    private var webView = WKWebView()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUI()
+    }
+    
+    // MARK: - Public methods
+    
+    func configure(with newsItem: NewsItem) {
+        if let url = URL(string: newsItem.sourceLink) {
+            let request = URLRequest(url: url)
+            webView.load(request)
+        }
+    }
+    
+    // MARK: - Buttons actions
+    
+    @objc private func backButtonTapped() {
+        dismiss(animated: true)
+    }
+    
+    @objc private func saveButtonTapped() {
+        print("saveButton tapped")
+    }
+    
+    // MARK: - Setup UI
+    
+    private func setupUI() {
+        view.backgroundColor = .greyBackGroundColor
+        setupBackButton()
+        setupSaveButton()
+        setupSeparateLine()
+        setupWebView()
+        setupConstraints()
+    }
+    
+    private func setupBackButton() {
+        backButton.setImage(UIImage(named: "backArrow"), for: .normal)
+        backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        view.addSubview(backButton)
+    }
+    
+    private func setupSaveButton() {
+        saveButton.setImage(UIImage(named: "bookmark"), for: .normal)
+        saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        view.addSubview(saveButton)
+    }
+    
+    private func setupSeparateLine() {
+        separateLine.backgroundColor = .lightGreyColor
+        view.addSubview(separateLine)
+    }
+    
+    private func setupWebView() {
+        webView.backgroundColor = .clear
+        webView.allowsBackForwardNavigationGestures = true
+        view.addSubview(webView)
+    }
+    
+    // MARK: - Setup constraints
+    
+    private func setupConstraints() {
+        backButton.snp.makeConstraints { maker in
+            maker.left.equalTo(view.safeAreaLayoutGuide.snp.left).offset(12)
+            maker.height.width.equalTo(28)
+            maker.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(5)
+        }
+        
+        saveButton.snp.makeConstraints { maker in
+            maker.right.equalTo(view.safeAreaLayoutGuide.snp.right).offset(-16)
+            maker.height.width.equalTo(28)
+            maker.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(5)
+        }
+        
+        separateLine.snp.makeConstraints { maker in
+            maker.top.equalTo(backButton.snp.bottom).offset(11)
+            maker.height.equalTo(1)
+            maker.left.right.equalToSuperview()
+        }
+        
+        webView.snp.makeConstraints { maker in
+            maker.top.equalTo(separateLine.snp.bottom)
+            maker.left.right.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+    }
+}

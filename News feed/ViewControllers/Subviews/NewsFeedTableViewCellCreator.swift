@@ -14,6 +14,9 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     private var titleLabel = UILabel()
     private var posterImageView = UIImageView()
     
+    private var newsItem: NewsItem?
+    private var manager: NewsItemsManager?
+    
     private var posterImageViewHeightConstraint: Constraint?
     private var isSaved = false
     
@@ -29,17 +32,30 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     }
     
     @objc private func toggleSaveState() {
+        guard let newsItem = newsItem else { return }
+        
         isSaved.toggle()
         updateSaveButtonUI()
+        
+        if isSaved {
+            manager?.saveNewsItem(newsItem)
+            print(manager?.getSavedItems().count ?? 0)
+        } else {
+            manager?.deleteNewsItem(newsItem)
+            print(manager?.getSavedItems().count ?? 0)
+        }
     }
     
     // MARK: - Public Methods
     
-    func configure(with newsItem: NewsItem) {
+    func configure(with newsItem: NewsItem, manager: NewsItemsManager) {
+        self.newsItem = newsItem
+                self.manager = manager
+        
         let timeLeft = getTimeAgo(from: newsItem.datePublished)
         sourceInfoLabel.text = "\(newsItem.sourceName) • \(timeLeft)"
-        
-        isSaved = newsItem.isSaved
+
+        isSaved = manager.isNewsItemSaved(newsItem)
         updateSaveButtonUI()
         
         titleLabel.text = newsItem.title
@@ -61,7 +77,7 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
                 if let data = data, let image = UIImage(data: data) {
                     self.posterImageView.image = image
                 } else {
-                    self.posterImageView.image = UIImage(named: "placeholder_image")
+//                    self.posterImageView.image = UIImage(named: "placeholder_image")
                 }
             }
         }
@@ -76,27 +92,41 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     private func getTimeAgo(from publishedDate: Date) -> String {
         let calendar = Calendar.current
         let now = Date()
-        let components = calendar.dateComponents([.minute, .hour, .day, .weekOfYear, .month, .year], from: publishedDate, to: now)
+        let components = calendar.dateComponents([.year, .month, .weekOfYear, .day, .hour, .minute], from: publishedDate, to: now)
         
-        if let year = components.year, year > 0 {
-            return "\(year) year\(year > 1 ? "s" : "") ago"
-        } else if let month = components.month, month > 0 {
-            return "\(month) month\(month > 1 ? "s" : "") ago"
-        } else if let week = components.weekOfYear, week > 0 {
-            return "\(week) week\(week > 1 ? "s" : "") ago"
-        } else if let day = components.day, day > 0 {
-            return "\(day) day\(day > 1 ? "s" : "") ago"
-        } else if let hour = components.hour, hour > 0 {
-            return "\(hour) hour\(hour > 1 ? "s" : "") ago"
-        } else if let minute = components.minute, minute > 0 {
-            return "\(minute) min\(minute > 1 ? "s" : "") ago"
-        } else {
+        switch components {
+        case let comp where comp.year ?? 0 > 0:
+            let years = comp.year!
+            return "\(years) year\(years > 1 ? "s" : "") ago"
+            
+        case let comp where comp.month ?? 0 > 0:
+            let months = comp.month!
+            return "\(months) month\(months > 1 ? "s" : "") ago"
+            
+        case let comp where comp.weekOfYear ?? 0 > 0:
+            let weeks = comp.weekOfYear!
+            return "\(weeks) week\(weeks > 1 ? "s" : "") ago"
+            
+        case let comp where comp.day ?? 0 > 0:
+            let days = comp.day!
+            return "\(days) day\(days > 1 ? "s" : "") ago"
+            
+        case let comp where comp.hour ?? 0 > 0:
+            let hours = comp.hour!
+            return "\(hours) hour\(hours > 1 ? "s" : "") ago"
+            
+        case let comp where comp.minute ?? 0 > 0:
+            let minutes = comp.minute!
+            return "\(minutes) min\(minutes > 1 ? "s" : "") ago"
+            
+        default:
             return "Just now"
         }
     }
  
     private func updateSaveButtonUI() {
-        saveButton.tintColor = isSaved ? .red : .lightGreyColor
+        let buttonImage = isSaved ? UIImage(named: "bookmarkSelected") : UIImage(named: "bookmark")
+        saveButton.setImage(buttonImage, for: .normal)
     }
 }
 
@@ -123,7 +153,7 @@ extension NewsFeedTableViewCellCreator {
     }
     
     private func setupSaveButton() {
-        let buttonImage = UIImage(systemName: "bookmark")
+        let buttonImage = UIImage(named: "bookmark")
         saveButton.setImage(buttonImage, for: .normal)
         saveButton.imageView?.contentMode = .scaleAspectFit
         saveButton.tintColor = .lightGreyColor

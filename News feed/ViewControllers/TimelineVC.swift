@@ -15,6 +15,7 @@ class TimelineVC: UIViewController {
     private var newsFeedTableView = UITableView()
     
     private let newsFeedCreator = NewsFeedCreator()
+    private let newsItemsManager = NewsItemsManager()
     
 //    треба тягнути данні з моделі замість того щоб юзать лишній масив
     private var newsItems: [NewsItem] = []
@@ -50,13 +51,19 @@ extension TimelineVC: UITableViewDataSource, UITableViewDelegate {
         }
                 
         let newsItem = newsItems[indexPath.row]
-        cell.configure(with: newsItem)
+        cell.configure(with: newsItem, manager: newsItemsManager)
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            tableView.deselectRow(at: indexPath, animated: true)
-        }
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        let vk = ShowOnSourceNewsItemVC()
+        let newsItem = newsItems[indexPath.row]
+        vk.configure(with: newsItem)
+        vk.modalPresentationStyle = .fullScreen
+        present(vk, animated: true)
+    }
 }
 
 // MARK: - Setup UI
@@ -85,12 +92,12 @@ extension TimelineVC {
     
     private func setupNewsFeedTableView() {
         newsFeedTableView.dataSource = self
-                newsFeedTableView.delegate = self
+        newsFeedTableView.delegate = self
         newsFeedTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: "NewsFeedTableViewCell")
-                newsFeedTableView.backgroundColor = .clear
+        newsFeedTableView.backgroundColor = .clear
         newsFeedTableView.separatorStyle = .singleLine
         newsFeedTableView.separatorColor = .lightGray
-                view.addSubview(newsFeedTableView)
+        view.addSubview(newsFeedTableView)
     }
     
     // MARK: - Setup Constraints

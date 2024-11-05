@@ -31,8 +31,7 @@ class MainTabBarController: UITabBarController {
         settingsVC.view.backgroundColor = .greyBackGroundColor
         settingsVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "bell"), tag: 2)
 
-        let profileVC = UIViewController()
-        profileVC.view.backgroundColor = .greyBackGroundColor
+        let profileVC = SavedNewsItemsVC()
         profileVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "bookmark"), tag: 3)
         
         viewControllers = [mainVC, timelineVC, settingsVC, profileVC]

@@ -6,12 +6,10 @@
 //
 import Foundation
 
-struct NewsItem {
+struct NewsItem: Encodable, Decodable {
     let title: String
     let imageUrl: String
     let sourceName: String
     let datePublished: Date
     let sourceLink: String
-    
-    var isSaved: Bool = false
 }

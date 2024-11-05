@@ -45,9 +45,7 @@ class RSSAtomNewsFetcher {
                 let title = entry.title ?? "No title"
                 let sourceName = entry.authors?.first?.name ?? "Unknown Source"
                 let sourceLink = entry.links?.first?.attributes?.href ?? ""
-
                 let datePublished = entry.published ?? Date()
-
                 let content = entry.content?.value ?? ""
                 let imageUrl = extractImageUrl(from: content)
 
