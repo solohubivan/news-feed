@@ -15,7 +15,7 @@ class TimelineVC: UIViewController {
     private var newsFeedTableView = UITableView()
     
     private let newsFeedCreator = NewsFeedCreator()
-    private let newsItemsManager = NewsItemsManager()
+    private let newsItemsManager = NewsItemsManager.shared
     
 //    треба тягнути данні з моделі замість того щоб юзать лишній масив
     private var newsItems: [NewsItem] = []
@@ -24,6 +24,17 @@ class TimelineVC: UIViewController {
         super.viewDidLoad()
         setupUI()
         fetchAndDisplayNews()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        for (index, _) in newsItems.enumerated() {
+            if let cell = newsFeedTableView.cellForRow(at: IndexPath(row: index, section: 0)) as? NewsFeedTableViewCellCreator {
+                cell.updateSaveButtonUI()
+            }
+        }
+        newsFeedTableView.reloadData()
     }
     
     // MARK: - Private methods

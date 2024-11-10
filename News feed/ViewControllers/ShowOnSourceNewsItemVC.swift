@@ -16,6 +16,10 @@ class ShowOnSourceNewsItemVC: UIViewController {
     private var separateLine = UIView()
     private var webView = WKWebView()
     
+    private let newsItemsManager = NewsItemsManager.shared
+    private var newsItem: NewsItem?
+    private var isSaved = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -24,11 +28,22 @@ class ShowOnSourceNewsItemVC: UIViewController {
     // MARK: - Public methods
     
     func configure(with newsItem: NewsItem) {
+        self.newsItem = newsItem
+        isSaved = newsItemsManager.isNewsItemSaved(newsItem)
+        updateSaveButtonUI()
+                
         if let url = URL(string: newsItem.sourceLink) {
             let request = URLRequest(url: url)
             webView.load(request)
         }
     }
+    
+    // MARK: - Private methods
+    
+    private func updateSaveButtonUI() {
+            let buttonImage = isSaved ? UIImage(named: "bookmarkSelected") : UIImage(named: "bookmark")
+            saveButton.setImage(buttonImage, for: .normal)
+        }
     
     // MARK: - Buttons actions
     
@@ -37,7 +52,16 @@ class ShowOnSourceNewsItemVC: UIViewController {
     }
     
     @objc private func saveButtonTapped() {
-        print("saveButton tapped")
+        guard let newsItem = newsItem else { return }
+        isSaved.toggle()
+
+        if isSaved {
+            newsItemsManager.saveNewsItem(newsItem)
+        } else {
+            newsItemsManager.deleteNewsItem(newsItem)
+        }
+            
+        updateSaveButtonUI()
     }
     
     // MARK: - Setup UI
@@ -58,7 +82,6 @@ class ShowOnSourceNewsItemVC: UIViewController {
     }
     
     private func setupSaveButton() {
-        saveButton.setImage(UIImage(named: "bookmark"), for: .normal)
         saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         view.addSubview(saveButton)
     }

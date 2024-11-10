@@ -20,6 +20,8 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     private var posterImageViewHeightConstraint: Constraint?
     private var isSaved = false
     
+    var onSaveStateChanged: (() -> Void)?
+    
     // MARK: - Initializers
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -33,24 +35,23 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     
     @objc private func toggleSaveState() {
         guard let newsItem = newsItem else { return }
-        
         isSaved.toggle()
         updateSaveButtonUI()
         
         if isSaved {
             manager?.saveNewsItem(newsItem)
-            print(manager?.getSavedItems().count ?? 0)
         } else {
             manager?.deleteNewsItem(newsItem)
-            print(manager?.getSavedItems().count ?? 0)
         }
+        
+        onSaveStateChanged?()
     }
     
     // MARK: - Public Methods
     
     func configure(with newsItem: NewsItem, manager: NewsItemsManager) {
         self.newsItem = newsItem
-                self.manager = manager
+        self.manager = manager
         
         let timeLeft = getTimeAgo(from: newsItem.datePublished)
         sourceInfoLabel.text = "\(newsItem.sourceName) • \(timeLeft)"
@@ -68,6 +69,26 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
         }
     }
     
+    func configureSavedNewsCell(with newsItem: NewsItem, manager: NewsItemsManager) {
+        self.newsItem = newsItem
+        self.manager = manager
+        
+        let timeLeft = getTimeAgo(from: newsItem.datePublished)
+        sourceInfoLabel.text = "\(newsItem.sourceName) • \(timeLeft)"
+
+        isSaved = manager.isNewsItemSaved(newsItem)
+        updateSaveButtonUI()
+        
+        titleLabel.text = newsItem.title
+        
+        setPosterImageViewVisibility(isVisible: false)
+    }
+    
+    func updateSaveButtonUI() {
+        let buttonImage = isSaved ? UIImage(named: "bookmarkSelected") : UIImage(named: "bookmark")
+        saveButton.setImage(buttonImage, for: .normal)
+    }
+    
     // MARK: - Private Methods
     
     private func loadImage(from url: URL) {
@@ -76,8 +97,6 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
             DispatchQueue.main.async {
                 if let data = data, let image = UIImage(data: data) {
                     self.posterImageView.image = image
-                } else {
-//                    self.posterImageView.image = UIImage(named: "placeholder_image")
                 }
             }
         }
@@ -122,11 +141,6 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
         default:
             return "Just now"
         }
-    }
- 
-    private func updateSaveButtonUI() {
-        let buttonImage = isSaved ? UIImage(named: "bookmarkSelected") : UIImage(named: "bookmark")
-        saveButton.setImage(buttonImage, for: .normal)
     }
 }
 
