@@ -17,6 +17,7 @@ class NewsFeedCreator {
     // MARK: - Public methods
     
     func fetchCombinedNews(completion: @escaping () -> Void) {
+        combinedNewsItems.removeAll()
         let dispatchGroup = DispatchGroup()
  
         dispatchGroup.enter()

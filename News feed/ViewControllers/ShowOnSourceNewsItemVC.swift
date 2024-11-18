@@ -15,6 +15,7 @@ class ShowOnSourceNewsItemVC: UIViewController {
     private var saveButton = UIButton()
     private var separateLine = UIView()
     private var webView = WKWebView()
+    private var activityIndicator = UIActivityIndicatorView(style: .large)
     
     private let newsItemsManager = NewsItemsManager.shared
     private var newsItem: NewsItem?
@@ -41,9 +42,9 @@ class ShowOnSourceNewsItemVC: UIViewController {
     // MARK: - Private methods
     
     private func updateSaveButtonUI() {
-            let buttonImage = isSaved ? UIImage(named: "bookmarkSelected") : UIImage(named: "bookmark")
-            saveButton.setImage(buttonImage, for: .normal)
-        }
+        let buttonImage = isSaved ? UIImage(named: "bookmarkSelected") : UIImage(named: "bookmark")
+        saveButton.setImage(buttonImage, for: .normal)
+    }
     
     // MARK: - Buttons actions
     
@@ -72,6 +73,7 @@ class ShowOnSourceNewsItemVC: UIViewController {
         setupSaveButton()
         setupSeparateLine()
         setupWebView()
+        setupActivityIndicator()
         setupConstraints()
     }
     
@@ -92,9 +94,17 @@ class ShowOnSourceNewsItemVC: UIViewController {
     }
     
     private func setupWebView() {
+        webView.navigationDelegate = self
         webView.backgroundColor = .clear
+        webView.alpha = 0
         webView.allowsBackForwardNavigationGestures = true
         view.addSubview(webView)
+    }
+    
+    private func setupActivityIndicator() {
+        activityIndicator.color = .white
+        activityIndicator.hidesWhenStopped = true
+        view.addSubview(activityIndicator)
     }
     
     // MARK: - Setup constraints
@@ -122,5 +132,24 @@ class ShowOnSourceNewsItemVC: UIViewController {
             maker.top.equalTo(separateLine.snp.bottom)
             maker.left.right.bottom.equalTo(view.safeAreaLayoutGuide)
         }
+        
+        activityIndicator.snp.makeConstraints { maker in
+            maker.center.equalToSuperview()
+        }
+    }
+}
+
+// MARK: - WebView delegates
+
+extension ShowOnSourceNewsItemVC: WKNavigationDelegate {
+    
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        activityIndicator.startAnimating()
+        webView.alpha = 0
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        webView.alpha = 1
+        activityIndicator.stopAnimating()
     }
 }

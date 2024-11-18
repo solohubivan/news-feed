@@ -45,7 +45,6 @@ class SavedNewsItemsVC: UIViewController {
 
 extension SavedNewsItemsVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-
         return newsItemsManager.getSavedItems().count
     }
     

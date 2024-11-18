@@ -79,12 +79,12 @@ import CoreData
 
 class NewsItemsManager {
     
-    static let shared = NewsItemsManager() // Синглтон
+    static let shared = NewsItemsManager()
     private var savedItems: [NewsItem] = []
 
     private let context = CoreDataStack.shared.context
 
-    private init() { // Приватний ініціалізатор для забезпечення синглтона
+    private init() {
         loadSavedItems()
     }
     
