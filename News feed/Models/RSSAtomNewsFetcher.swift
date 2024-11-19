@@ -5,12 +5,14 @@
 //  Created by Ivan Solohub on 29.10.2024.
 //
 
+
 import Foundation
 import FeedKit
 
 class RSSAtomNewsFetcher {
 
     private var newsItems: [NewsItem] = []
+    private var lastNewsID: String?
 
     // MARK: - Public methods
 
@@ -23,9 +25,9 @@ class RSSAtomNewsFetcher {
             completion()
             return
         }
-            
+        
         let parser = FeedParser(URL: feedURL)
-
+        
         parser.parseAsync { [weak self] result in
             switch result {
             case .success(let feed):
@@ -36,6 +38,17 @@ class RSSAtomNewsFetcher {
             }
         }
     }
+
+    func fetchNewsAfterLastID(from baseURL: String, limit: Int = 10, completion: @escaping () -> Void) {
+        guard let lastID = lastNewsID else {
+            completion()
+            return
+        }
+        let url = "\(baseURL)?limit=\(limit)&after=\(lastID)"
+        fetchNews(from: url, completion: completion)
+    }
+    
+    // MARK: - Private methods
 
     private func parseFeed(_ feed: Feed) {
         newsItems = []
@@ -57,9 +70,11 @@ class RSSAtomNewsFetcher {
                     sourceLink: sourceLink
                 )
                 newsItems.append(newsItem)
+                
+                if let id = entry.id {
+                    lastNewsID = id
+                }
             }
-        } else {
-
         }
     }
 
@@ -70,9 +85,7 @@ class RSSAtomNewsFetcher {
             if let match = regex.firstMatch(in: content, options: [], range: range) {
                 if let imageUrlRange = Range(match.range(at: 1), in: content) {
                     var imageUrl = String(content[imageUrlRange])
-
                     imageUrl = imageUrl.replacingOccurrences(of: "&amp;", with: "&")
-
                     if URL(string: imageUrl) != nil {
                         return imageUrl
                     }

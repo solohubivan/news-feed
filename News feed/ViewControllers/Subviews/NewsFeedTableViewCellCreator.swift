@@ -17,6 +17,7 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     private var newsItem: NewsItem?
     private var manager: NewsItemsManager?
     
+    private var imageLoadIdentifier: String?
     private var posterImageViewHeightConstraint: Constraint?
     private var isSaved = false
     
@@ -61,10 +62,14 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
         
         titleLabel.text = newsItem.title
         
-        if let imageUrl = URL(string: newsItem.imageUrl), !newsItem.imageUrl.isEmpty {
+        if let imageUrlString = newsItem.imageUrl, let imageUrl = URL(string: imageUrlString) {
+            imageLoadIdentifier = imageUrlString
             loadImage(from: imageUrl)
             setPosterImageViewVisibility(isVisible: true)
+            
         } else {
+            imageLoadIdentifier = nil
+            posterImageView.image = nil
             setPosterImageViewVisibility(isVisible: false)
         }
     }
@@ -93,9 +98,9 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     
     private func loadImage(from url: URL) {
         let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
-            guard let self = self else { return } 
+            guard let self = self, error == nil, let data = data, let image = UIImage(data: data) else { return }
             DispatchQueue.main.async {
-                if let data = data, let image = UIImage(data: data) {
+                if self.imageLoadIdentifier == url.absoluteString {
                     self.posterImageView.image = image
                 }
             }

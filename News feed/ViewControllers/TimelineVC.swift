@@ -23,14 +23,17 @@ class TimelineVC: UIViewController {
     private var nativeAdLoader: GADAdLoader?
     private var nativeAd: GADNativeAd?
     private var interstitialAd: GADInterstitialAd?
+    private var selectedNewsItem: NewsItem?
     private var transitionCount = 0
     
     private var newsItems: [NewsItem] = []
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        fetchAndDisplayNews()
+        fetchNews(isInitialLoad: true, limit: 75)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -44,21 +47,33 @@ class TimelineVC: UIViewController {
         newsFeedTableView.reloadData()
     }
     
+    // MARK: - Actions
+    
     @objc private func refreshNews() {
-        fetchAndDisplayNews()
+        fetchNews(isInitialLoad: true, limit: 75)
     }
         
     // MARK: - Private methods
     
-    private func fetchAndDisplayNews() {
-        
-        newsFeedCreator.fetchCombinedNews { [weak self] in
+    private func fetchNews(isInitialLoad: Bool, limit: Int) {
+        newsFeedCreator.fetchNews(isInitialLoad: isInitialLoad, limit: limit) { [weak self] in
             DispatchQueue.main.async {
+                if isInitialLoad {
+                    self?.newsItems.removeAll()
+                    self?.refreshControl.endRefreshing()
+                }
                 self?.newsItems = self?.newsFeedCreator.getCombinedNewsItems() ?? []
                 self?.newsFeedTableView.reloadData()
-                self?.refreshControl.endRefreshing()
             }
         }
+    }
+    
+    private func showNewsItemVC() {
+        guard let newsItem = selectedNewsItem else { return }
+        let vk = ShowOnSourceNewsItemVC()
+        vk.configure(with: newsItem)
+        vk.modalPresentationStyle = .fullScreen
+        present(vk, animated: false)
     }
 }
 
@@ -95,18 +110,21 @@ extension TimelineVC: UITableViewDataSource, UITableViewDelegate {
         let newsIndex = indexPath.row - (indexPath.row / 11)
         guard newsIndex < newsItems.count else { return }
             
-        let newsItem = newsItems[newsIndex]
-        let vk = ShowOnSourceNewsItemVC()
-        vk.configure(with: newsItem)
-        vk.modalPresentationStyle = .fullScreen
-        
+        selectedNewsItem = newsItems[newsIndex]
         transitionCount += 1
         
         if transitionCount % 3 == 0, let interstitialAd = interstitialAd {
             interstitialAd.present(fromRootViewController: self)
             loadInterstitialAd()
         } else {
-            present(vk, animated: false)
+            showNewsItemVC()
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let thresholdIndex = newsItems.count
+        if indexPath.row == thresholdIndex {
+            fetchNews(isInitialLoad: false, limit: 30)
         }
     }
 }
@@ -115,15 +133,11 @@ extension TimelineVC: UITableViewDataSource, UITableViewDelegate {
 
 extension TimelineVC: GADFullScreenContentDelegate {
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        let newsIndex = newsFeedTableView.indexPathForSelectedRow?.row ?? 0
-        let vk = ShowOnSourceNewsItemVC()
-        vk.configure(with: newsItems[newsIndex])
-        vk.modalPresentationStyle = .fullScreen
-        present(vk, animated: true)
+        showNewsItemVC()
     }
     
     func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        
+        showNewsItemVC()
     }
 }
 

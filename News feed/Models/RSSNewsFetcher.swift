@@ -18,7 +18,7 @@ class RSSNewsFetcher {
         return newsItems
     }
     
-    func fetchNews(from url: String, completion: @escaping () -> Void) {
+    func fetchRSSNews(from url: String, completion: @escaping () -> Void) {
         guard let feedURL = URL(string: url) else {
             completion()
             return
