@@ -17,7 +17,7 @@ class ShowOnSourceNewsItemVC: UIViewController {
     private var webView = WKWebView()
     private var activityIndicator = UIActivityIndicatorView(style: .large)
     
-    private let newsItemsManager = NewsItemsManager.shared
+    private let newsItemsManager = NewsItemsCacheManager.shared
     private var newsItem: NewsItem?
     private var isSaved = false
     

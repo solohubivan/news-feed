@@ -6,6 +6,7 @@
 
 import UIKit
 import SnapKit
+import Alamofire
 
 class NewsFeedTableViewCellCreator: UITableViewCell {
     
@@ -15,7 +16,7 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     private var posterImageView = UIImageView()
     
     private var newsItem: NewsItem?
-    private var manager: NewsItemsManager?
+    private var manager: NewsItemsCacheManager?
     
     private var imageLoadIdentifier: String?
     private var posterImageViewHeightConstraint: Constraint?
@@ -50,31 +51,63 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     
     // MARK: - Public Methods
     
-    func configure(with newsItem: NewsItem, manager: NewsItemsManager) {
+//    func configure(with newsItem: NewsItem, manager: NewsItemsCacheManager) {
+//        self.newsItem = newsItem
+//        self.manager = manager
+//        
+//        let timeLeft = getTimeAgo(from: newsItem.datePublished)
+//        sourceInfoLabel.text = "\(newsItem.sourceName) • \(timeLeft)"
+//
+//        isSaved = manager.isNewsItemSaved(newsItem)
+//        updateSaveButtonUI()
+//        
+//        titleLabel.text = newsItem.title
+//        
+//        if let imageUrlString = newsItem.imageUrl, let imageUrl = URL(string: imageUrlString) {
+//            imageLoadIdentifier = imageUrlString
+//            loadImage(from: imageUrl)
+//            setPosterImageViewVisibility(isVisible: true)
+//            
+//        } else {
+//            imageLoadIdentifier = nil
+//            posterImageView.image = nil
+//            setPosterImageViewVisibility(isVisible: false)
+//        }
+//    }
+    func configure(with newsItem: NewsItem, manager: NewsItemsCacheManager) {
         self.newsItem = newsItem
         self.manager = manager
-        
+
+        // Оновлення джерела та часу публікації
         let timeLeft = getTimeAgo(from: newsItem.datePublished)
         sourceInfoLabel.text = "\(newsItem.sourceName) • \(timeLeft)"
 
+        // Оновлення стану кнопки збереження
         isSaved = manager.isNewsItemSaved(newsItem)
         updateSaveButtonUI()
-        
+
+        // Відображення заголовка новини
         titleLabel.text = newsItem.title
-        
-        if let imageUrlString = newsItem.imageUrl, let imageUrl = URL(string: imageUrlString) {
+
+        // Логіка відображення зображення
+        if let imageData = newsItem.imageData, let image = UIImage(data: imageData) {
+            // Якщо є збережене зображення
+            posterImageView.image = image
+            setPosterImageViewVisibility(isVisible: true)
+        } else if let imageUrlString = newsItem.imageUrl, let imageUrl = URL(string: imageUrlString) {
+            // Якщо збереженого зображення немає, але є URL
             imageLoadIdentifier = imageUrlString
             loadImage(from: imageUrl)
             setPosterImageViewVisibility(isVisible: true)
-            
         } else {
+            // Якщо немає ні збереженого зображення, ні URL
             imageLoadIdentifier = nil
             posterImageView.image = nil
             setPosterImageViewVisibility(isVisible: false)
         }
     }
     
-    func configureSavedNewsCell(with newsItem: NewsItem, manager: NewsItemsManager) {
+    func configureSavedNewsCell(with newsItem: NewsItem, manager: NewsItemsCacheManager) {
         self.newsItem = newsItem
         self.manager = manager
         
@@ -96,16 +129,34 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     
     // MARK: - Private Methods
     
+//    private func loadImage(from url: URL) {
+//        let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+//            guard let self = self, error == nil, let data = data, let image = UIImage(data: data) else { return }
+//            DispatchQueue.main.async {
+//                if self.imageLoadIdentifier == url.absoluteString {
+//                    self.posterImageView.image = image
+//                }
+//            }
+//        }
+//        task.resume()
+//    }
     private func loadImage(from url: URL) {
-        let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
-            guard let self = self, error == nil, let data = data, let image = UIImage(data: data) else { return }
-            DispatchQueue.main.async {
-                if self.imageLoadIdentifier == url.absoluteString {
-                    self.posterImageView.image = image
+        imageLoadIdentifier = url.absoluteString
+
+        AF.request(url).responseData { [weak self] response in
+            guard let self = self else { return }
+
+            switch response.result {
+            case .success(let data):
+                if self.imageLoadIdentifier == url.absoluteString, let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.posterImageView.image = image
+                    }
                 }
+            case .failure(let error):
+                print("Failed to load image: \(error.localizedDescription)")
             }
         }
-        task.resume()
     }
     
     private func setPosterImageViewVisibility(isVisible: Bool) {

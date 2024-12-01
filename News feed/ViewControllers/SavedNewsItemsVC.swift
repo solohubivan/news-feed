@@ -13,7 +13,7 @@ class SavedNewsItemsVC: UIViewController {
     private var savedNewsItemsTableView = UITableView()
     private let refreshControl = UIRefreshControl()
     
-    private let newsItemsManager = NewsItemsManager.shared
+    private let newsItemsManager = NewsItemsCacheManager.shared
     
     private var savedNewsItems: [NewsItem] = []
     

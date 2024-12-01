@@ -9,6 +9,7 @@ import Foundation
 struct NewsItem: Encodable, Decodable {
     let title: String
     let imageUrl: String?
+    let imageData: Data?
     let sourceName: String
     let datePublished: Date
     let sourceLink: String

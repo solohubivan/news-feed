@@ -8,5 +8,6 @@ target 'News feed' do
   # Pods for News feed
   pod 'SnapKit'
   pod 'Google-Mobile-Ads-SDK'
+  pod 'Alamofire'
 
 end

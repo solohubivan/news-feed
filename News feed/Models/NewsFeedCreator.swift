@@ -12,154 +12,96 @@ class NewsFeedCreator {
     private let rssNewsFetcher = RSSNewsFetcher()
     private let atomNewsFetcher = RSSAtomNewsFetcher()
     private var combinedNewsItems: [NewsItem] = []
+    private var preparedNewsItems: [NewsItem] = []
 
     // MARK: - Public methods
     
     func getCombinedNewsItems() -> [NewsItem] {
         return combinedNewsItems
     }
-
-    func fetchNews(isInitialLoad: Bool, limit: Int, completion: @escaping () -> Void) {
-        if isInitialLoad {
-            combinedNewsItems.removeAll()
-        }
+    
+    func fetchInitialNews(completion: @escaping () -> Void) {
+        combinedNewsItems.removeAll()
+        preparedNewsItems.removeAll()
+        
+        var nytimes: [NewsItem] = []
+        var theGuardian: [NewsItem] = []
+        var reddit: [NewsItem] = []
 
         let dispatchGroup = DispatchGroup()
-        var newFetchedNewsItems: [NewsItem] = []
-
+        
         dispatchGroup.enter()
         rssNewsFetcher.fetchRSSNews(from: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml") {
-            let newsItemsFromNYTimes = self.rssNewsFetcher.getNewsItems()
-            newFetchedNewsItems.append(contentsOf: newsItemsFromNYTimes)
+            nytimes = self.rssNewsFetcher.getNewsItems()
+            self.preparedNewsItems.append(contentsOf: nytimes)
             dispatchGroup.leave()
         }
 
         dispatchGroup.enter()
         rssNewsFetcher.fetchRSSNews(from: "https://www.theguardian.com/world/rss") {
-            let newsItemsFromGuardian = self.rssNewsFetcher.getNewsItems()
-            newFetchedNewsItems.append(contentsOf: newsItemsFromGuardian)
+            theGuardian = self.rssNewsFetcher.getNewsItems()
+            self.preparedNewsItems.append(contentsOf: theGuardian)
             dispatchGroup.leave()
         }
 
         dispatchGroup.enter()
-        atomNewsFetcher.fetchNewsAfterLastID(from: "https://www.reddit.com/.rss") {
-            let newsItemsFromReddit = self.atomNewsFetcher.getNewsItems()
-            newFetchedNewsItems.append(contentsOf: newsItemsFromReddit)
+        atomNewsFetcher.fetchNews(from: "https://www.reddit.com/.rss?limit=100") {
+            reddit = self.atomNewsFetcher.getNewsItems()
+            self.preparedNewsItems.append(contentsOf: reddit)
             dispatchGroup.leave()
         }
 
         dispatchGroup.notify(queue: .main) {
-            let sortedNewsItems = newFetchedNewsItems.sorted { $0.datePublished > $1.datePublished }
-            let uniqueNewsItems = sortedNewsItems.filter { item in
-                !self.combinedNewsItems.contains(where: { $0.title == item.title })
-            }
+            let allNews = nytimes + theGuardian + reddit
+            let uniqueNews = self.removeDuplicates(from: allNews)
 
-//            додай додавання новин із кешу
-//            if uniqueNewsItems.isEmpty {
-//                print("новини закінчились")
-//                completion()
-//                return
-//            }
-
-            let limitedItems = Array(uniqueNewsItems.prefix(limit))
-            self.combinedNewsItems.append(contentsOf: limitedItems)
+            self.combinedNewsItems.append(contentsOf: uniqueNews)
+            self.combinedNewsItems.sort { $0.datePublished > $1.datePublished }
+            
             completion()
         }
     }
-}
-
-
-//import Foundation
-//
-//class NewsFeedCreator {
-//
-//    private let rssNewsFetcher = RSSNewsFetcher()
-//    private let atomNewsFetcher = RSSAtomNewsFetcher()
-//    private var combinedNewsItems: [NewsItem] = []
-//    
-//    // Прапорці для позначення того, що новини закінчились
-//    private var hasMoreNYTimesNews = true
-//    private var hasMoreGuardianNews = true
-//    private var hasMoreRedditNews = true
-//
-//    // MARK: - Public methods
-//
-//    func fetchNews(isInitialLoad: Bool, limit: Int, completion: @escaping () -> Void) {
-//        if isInitialLoad {
-//            combinedNewsItems.removeAll()
-//            // Скидаємо прапорці на початку
-//            hasMoreNYTimesNews = true
-//            hasMoreGuardianNews = true
-//            hasMoreRedditNews = true
-//        }
-//
-//        let dispatchGroup = DispatchGroup()
-//        var newFetchedNewsItems: [NewsItem] = []
-//
-//        if hasMoreNYTimesNews {
-//            dispatchGroup.enter()
-//            rssNewsFetcher.fetchRSSNews(from: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml") {
-//                let newsItemsFromNYTimes = self.rssNewsFetcher.getNewsItems()
-//                
-//                if newsItemsFromNYTimes.isEmpty {
-//                    self.hasMoreNYTimesNews = false // Позначаємо, що новин більше нема
-//                } else {
-//                    newFetchedNewsItems.append(contentsOf: newsItemsFromNYTimes)
-//                }
-//                
-//                dispatchGroup.leave()
-//            }
-//        }
-//
-//        if hasMoreGuardianNews {
-//            dispatchGroup.enter()
-//            rssNewsFetcher.fetchRSSNews(from: "https://www.theguardian.com/world/rss") {
-//                let newsItemsFromGuardian = self.rssNewsFetcher.getNewsItems()
-//                
-//                if newsItemsFromGuardian.isEmpty {
-//                    self.hasMoreGuardianNews = false // Позначаємо, що новин більше нема
-//                } else {
-//                    newFetchedNewsItems.append(contentsOf: newsItemsFromGuardian)
-//                }
-//                
-//                dispatchGroup.leave()
-//            }
-//        }
-//
-//        if hasMoreRedditNews {
-//            dispatchGroup.enter()
-//            atomNewsFetcher.fetchNewsAfterLastID(from: "https://www.reddit.com/.rss") {
-//                let newsItemsFromReddit = self.atomNewsFetcher.getNewsItems()
-//                
-//                if newsItemsFromReddit.isEmpty {
-//                    self.hasMoreRedditNews = false // Позначаємо, що новин більше нема
-//                } else {
-//                    newFetchedNewsItems.append(contentsOf: newsItemsFromReddit)
-//                }
-//                
-//                dispatchGroup.leave()
-//            }
-//        }
-//
-//        dispatchGroup.notify(queue: .main) {
-//            let sortedNewsItems = newFetchedNewsItems.sorted { $0.datePublished > $1.datePublished }
-//            let uniqueNewsItems = sortedNewsItems.filter { item in
-//                !self.combinedNewsItems.contains(where: { $0.title == item.title })
-//            }
-//
-//            if uniqueNewsItems.isEmpty && !isInitialLoad {
-//                print("Новини закінчились або більше нема нових елементів.")
-//                completion()
-//                return
-//            }
-//
-//            let limitedItems = Array(uniqueNewsItems.prefix(limit))
-//            self.combinedNewsItems.append(contentsOf: limitedItems)
+    
+    func fetchMoreNews(completion: @escaping () -> Void) {
+        guard !preparedNewsItems.isEmpty else {
+            print("No more news available in preparedNewsItems")
 //            completion()
-//        }
-//    }
-//
-//    func getCombinedNewsItems() -> [NewsItem] {
-//        return combinedNewsItems
-//    }
-//}
+            return
+        }
+        let uniqueNewsItems = preparedNewsItems.filter { item in
+            !combinedNewsItems.contains(where: { $0.title == item.title })
+        }
+        preparedNewsItems = uniqueNewsItems
+        preparedNewsItems.sort { $0.datePublished > $1.datePublished }
+        combinedNewsItems.append(contentsOf: preparedNewsItems)
+        preparedNewsItems.removeAll()
+        
+//        let cachedNews = NewsItemsCacheManager.shared.loadAllFromCache()
+//        print(cachedNews.count)
+        
+        
+        completion()
+    }
+    
+    func fetchNewsFromCache(completion: @escaping () -> Void) {
+        combinedNewsItems.removeAll()
+        
+        let cachedNews = NewsItemsCacheManager.shared.loadAllFromCache()
+        let sortedCachedNews = cachedNews.sorted { $0.datePublished > $1.datePublished }
+        
+        combinedNewsItems.append(contentsOf: sortedCachedNews)
+        
+        print("Loaded \(combinedNewsItems.count) news items from cache.")
+        completion()
+    }
+    
+    private func removeDuplicates(from news: [NewsItem]) -> [NewsItem] {
+        var seenItems: [(String, Date)] = []
+        return news.filter { newsItem in
+            let identifier = (newsItem.title, newsItem.datePublished)
+            guard !seenItems.contains(where: { $0.0 == identifier.0 && $0.1 == identifier.1 }) else { return false }
+            seenItems.append(identifier)
+            return true
+        }
+    }
+}

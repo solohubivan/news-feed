@@ -17,7 +17,7 @@ class TimelineVC: UIViewController {
     private let refreshControl = UIRefreshControl()
     
     private let newsFeedCreator = NewsFeedCreator()
-    private let newsItemsManager = NewsItemsManager.shared
+    private let newsItemsManager = NewsItemsCacheManager.shared
 
     private var bannerView: GADBannerView?
     private var nativeAdLoader: GADAdLoader?
@@ -33,7 +33,17 @@ class TimelineVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        fetchNews(isInitialLoad: true, limit: 75)
+        
+        NetworkMonitor.shared.onUseOfflineModeAllert = { [weak self] in
+            self?.fetchCachedNewsAndUpdateTable()
+        }
+        
+        NetworkMonitor.shared.onUseOnlineModeAllert = { [weak self] in
+            self?.fetchAndDisplayInitialNews()
+            self?.scrollToTop()
+        }
+        
+        checkConnectionModeAndFetchData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -50,18 +60,51 @@ class TimelineVC: UIViewController {
     // MARK: - Actions
     
     @objc private func refreshNews() {
-        fetchNews(isInitialLoad: true, limit: 75)
+        checkConnectionModeAndFetchData()
     }
         
     // MARK: - Private methods
     
-    private func fetchNews(isInitialLoad: Bool, limit: Int) {
-        newsFeedCreator.fetchNews(isInitialLoad: isInitialLoad, limit: limit) { [weak self] in
+    private func checkConnectionModeAndFetchData() {
+        if NetworkMonitor.shared.connectionMode == .online {
+            fetchAndDisplayInitialNews()
+        } else {
+            fetchCachedNewsAndUpdateTable()
+        }
+    }
+    
+    private func fetchAndDisplayInitialNews() {
+        newsFeedCreator.fetchInitialNews { [weak self] in
             DispatchQueue.main.async {
-                if isInitialLoad {
-                    self?.newsItems.removeAll()
-                    self?.refreshControl.endRefreshing()
+                self?.newsItems.removeAll()
+                self?.newsItems = self?.newsFeedCreator.getCombinedNewsItems() ?? []
+                self?.newsFeedTableView.reloadData()
+                self?.refreshControl.endRefreshing()
+                self?.bannerView?.isHidden = false
+               
+                DispatchQueue.global(qos: .background).async {
+                    NewsItemsCacheManager.shared.saveAllToCache(self?.newsItems ?? [])
                 }
+            }
+        }
+    }
+    
+    private func fetchCachedNewsAndUpdateTable() {
+        newsFeedCreator.fetchNewsFromCache { [weak self] in
+            DispatchQueue.main.async {
+                self?.newsItems.removeAll()
+                self?.newsItems = self?.newsFeedCreator.getCombinedNewsItems() ?? []
+                self?.newsFeedTableView.reloadData()
+                self?.refreshControl.endRefreshing()
+                self?.bannerView?.isHidden = true
+            }
+        }
+    }
+
+    private func loadMoreNews() {
+        newsFeedCreator.fetchMoreNews { [weak self] in
+            DispatchQueue.main.async {
+                self?.newsItems.removeAll()
                 self?.newsItems = self?.newsFeedCreator.getCombinedNewsItems() ?? []
                 self?.newsFeedTableView.reloadData()
             }
@@ -74,6 +117,11 @@ class TimelineVC: UIViewController {
         vk.configure(with: newsItem)
         vk.modalPresentationStyle = .fullScreen
         present(vk, animated: false)
+    }
+    
+    private func scrollToTop() {
+        let topIndexPath = IndexPath(row: 0, section: 0)
+        newsFeedTableView.scrollToRow(at: topIndexPath, at: .top, animated: true)
     }
 }
 
@@ -124,7 +172,7 @@ extension TimelineVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let thresholdIndex = newsItems.count
         if indexPath.row == thresholdIndex {
-            fetchNews(isInitialLoad: false, limit: 30)
+            loadMoreNews()
         }
     }
 }
