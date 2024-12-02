@@ -11,12 +11,12 @@ class AlertFactory {
     
     static func noInternetAlert(onSettings: @escaping () -> Void, onUseOffline: @escaping () -> Void) -> UIAlertController {
         let alert = UIAlertController(
-            title: "No internet connection",
-            message: "Please enable internet access or use the app in offline mode.",
+            title: AppConstants.AlertFactory.titleNoInternetConnection,
+            message: AppConstants.AlertFactory.messagePleaseEnableInternetAccessOrUseTheAppInOffline,
             preferredStyle: .alert
         )
         
-        let settingsAction = UIAlertAction(title: "Settings", style: .default) { _ in
+        let settingsAction = UIAlertAction(title: AppConstants.AlertFactory.settingsButtonText, style: .default) { _ in
             if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
                 if UIApplication.shared.canOpenURL(settingsURL) {
                     UIApplication.shared.open(settingsURL, options: [:], completionHandler: nil)
@@ -25,7 +25,7 @@ class AlertFactory {
             onSettings()
         }
         
-        let cancelAction = UIAlertAction(title: "Use offline mode", style: .cancel) { _ in
+        let cancelAction = UIAlertAction(title: AppConstants.AlertFactory.keepOfflineButtonText, style: .cancel) { _ in
             onUseOffline()
         }
         
@@ -37,16 +37,16 @@ class AlertFactory {
     
     static func internetRestoredAlert(onUseOnline: @escaping () -> Void, onKeepOffline: @escaping () -> Void) -> UIAlertController {
         let alert = UIAlertController(
-            title: "Internet Restored",
-            message: "Your internet connection is back. Would you like to switch to online mode?",
+            title: AppConstants.AlertFactory.titleInternetRestored,
+            message: AppConstants.AlertFactory.messageInternetRestored,
             preferredStyle: .alert
         )
                 
-        let useOnlineAction = UIAlertAction(title: "Use online", style: .cancel) { _ in
+        let useOnlineAction = UIAlertAction(title: AppConstants.AlertFactory.useOnlineButtonText, style: .cancel) { _ in
             onUseOnline()
         }
                 
-        let keepOfflineAction = UIAlertAction(title: "Keep offline", style: .default) { _ in
+        let keepOfflineAction = UIAlertAction(title: AppConstants.AlertFactory.keepOfflineButtonText, style: .default) { _ in
             onKeepOffline()
         }
                 
@@ -58,12 +58,12 @@ class AlertFactory {
     
     static func noInternetForNewsAlert(onOk: (() -> Void)? = nil) -> UIAlertController {
         let alert = UIAlertController(
-            title: "No internet connection",
-            message: "We suggest adding the news to your saved items and viewing it in detail once an internet connection is established.",
+            title: AppConstants.AlertFactory.titleNoInternetConnection,
+            message: AppConstants.AlertFactory.messageNoInternetConnection,
             preferredStyle: .alert
         )
             
-        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+        let okAction = UIAlertAction(title: AppConstants.AlertFactory.oKButtonText, style: .default) { _ in
             onOk?()
         }
         alert.addAction(okAction)

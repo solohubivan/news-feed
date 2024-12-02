@@ -43,7 +43,7 @@ class RSSNewsFetcher {
         
         if let rssFeed = feed.rssFeed {
             for item in rssFeed.items ?? [] {
-                let title = item.title ?? "No title"
+                let title = item.title ?? ""
                 let sourceLink = item.link ?? ""
                 let datePublished = item.pubDate ?? Date()
                 let description = item.description ?? ""
@@ -76,10 +76,10 @@ class RSSNewsFetcher {
                 .replacingOccurrences(of: "www.", with: "")
                 .components(separatedBy: ".")
                 .first?
-                .lowercased() ?? "unknown source"
+                .lowercased() ?? ""
         }
         
-        return "unknown source"
+        return ""
     }
 
     private func extractHighQualityImageUrl(from mediaContents: [MediaContent], thumbnail: [MediaThumbnail], description: String) -> String {

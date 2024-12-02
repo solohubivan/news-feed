@@ -142,7 +142,7 @@ extension TimelineVC: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.row % 11 == 10, let nativeAd = nativeAd {
-            guard let adCell = tableView.dequeueReusableCell(withIdentifier: "NativeAdTableViewCell", for: indexPath) as? NativeAdTableViewCell else {
+            guard let adCell = tableView.dequeueReusableCell(withIdentifier: AppConstants.Identifiers.nativeAdTableViewCellID, for: indexPath) as? NativeAdTableViewCell else {
                 return UITableViewCell()
             }
             adCell.configureAd(with: nativeAd)
@@ -150,7 +150,7 @@ extension TimelineVC: UITableViewDataSource, UITableViewDelegate {
         }
 
         let newsIndex = indexPath.row - (indexPath.row / 11)
-        guard let newsCell = tableView.dequeueReusableCell(withIdentifier: "NewsFeedTableViewCell", for: indexPath) as? NewsFeedTableViewCellCreator else {
+        guard let newsCell = tableView.dequeueReusableCell(withIdentifier: AppConstants.Identifiers.newsFeedTableViewCellID, for: indexPath) as? NewsFeedTableViewCellCreator else {
             return UITableViewCell()
         }
             
@@ -230,9 +230,10 @@ extension TimelineVC {
     }
     
     private func setupTitleLabel() {
-        titleLabel.text = "Timeline"
+        titleLabel.text = AppConstants.TimelineVC.titleLabelText
         titleLabel.textColor = .newsTextColor
-        titleLabel.font = UIFont(name: "Poppins-Regular", size: 16)
+        titleLabel.font = .customFont(name: AppConstants.Fonts.poppinsRegular, size: 16, textStyle: .body)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textAlignment = .center
         view.addSubview(titleLabel)
     }
@@ -245,8 +246,8 @@ extension TimelineVC {
     private func setupNewsFeedTableView() {
         newsFeedTableView.dataSource = self
         newsFeedTableView.delegate = self
-        newsFeedTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: "NewsFeedTableViewCell")
-        newsFeedTableView.register(NativeAdTableViewCell.self, forCellReuseIdentifier: "NativeAdTableViewCell")
+        newsFeedTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: AppConstants.Identifiers.newsFeedTableViewCellID)
+        newsFeedTableView.register(NativeAdTableViewCell.self, forCellReuseIdentifier: AppConstants.Identifiers.nativeAdTableViewCellID)
         newsFeedTableView.backgroundColor = .clear
         newsFeedTableView.separatorStyle = .singleLine
         newsFeedTableView.separatorColor = .lightGray
@@ -257,7 +258,7 @@ extension TimelineVC {
     
     private func setupBannerAd() {
         bannerView = GADBannerView(adSize: GADAdSizeBanner)
-        bannerView?.adUnitID = "ca-app-pub-1254388627213292/3555700304"
+        bannerView?.adUnitID = AdKeys.bannerAdUnitID
         bannerView?.rootViewController = self
         bannerView?.load(GADRequest())
         bannerView?.backgroundColor = .secondarySystemBackground
@@ -267,7 +268,7 @@ extension TimelineVC {
     }
     
     private func loadNativeAd() {
-        nativeAdLoader = GADAdLoader(adUnitID: "ca-app-pub-1254388627213292/4262648445",
+        nativeAdLoader = GADAdLoader(adUnitID: AdKeys.nativeAdUnitID,
                                      rootViewController: self,
                                      adTypes: [.native],
                                      options: nil)
@@ -278,9 +279,8 @@ extension TimelineVC {
     
     private func loadInterstitialAd() {
         let request = GADRequest()
-        GADInterstitialAd.load(withAdUnitID: "ca-app-pub-1254388627213292/3787774210", request: request) { [weak self] ad, error in
-            if let error = error {
-                print("Failed to load interstitial ad: \(error.localizedDescription)")
+        GADInterstitialAd.load(withAdUnitID: AdKeys.interstitialAdUnitID, request: request) { [weak self] ad, error in
+            if error != nil {
                 return
             }
             self?.interstitialAd = ad

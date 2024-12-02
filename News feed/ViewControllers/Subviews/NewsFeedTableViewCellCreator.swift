@@ -93,7 +93,7 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
     }
     
     func updateSaveButtonUI() {
-        let buttonImage = isSaved ? UIImage(named: "bookmarkSelected") : UIImage(named: "bookmark")
+        let buttonImage = isSaved ? UIImage(named: AppConstants.ImagesNames.bookmarkSelected) : UIImage(named: AppConstants.ImagesNames.bookmark)
         saveButton.setImage(buttonImage, for: .normal)
     }
     
@@ -112,8 +112,8 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
                         self.posterImageView.image = image
                     }
                 }
-            case .failure(let error):
-                print("Failed to load image: \(error.localizedDescription)")
+            case .failure(_):
+                break
             }
         }
     }
@@ -131,30 +131,30 @@ class NewsFeedTableViewCellCreator: UITableViewCell {
         switch components {
         case let comp where comp.year ?? 0 > 0:
             let years = comp.year!
-            return "\(years) year\(years > 1 ? "s" : "") ago"
+            return "\(years) \(AppConstants.NewsFeedTableViewCellCreator.year)\(years > 1 ? "s" : "") \(AppConstants.NewsFeedTableViewCellCreator.ago)"
             
         case let comp where comp.month ?? 0 > 0:
             let months = comp.month!
-            return "\(months) month\(months > 1 ? "s" : "") ago"
+            return "\(months) \(AppConstants.NewsFeedTableViewCellCreator.month)\(months > 1 ? "s" : "") \(AppConstants.NewsFeedTableViewCellCreator.ago)"
             
         case let comp where comp.weekOfYear ?? 0 > 0:
             let weeks = comp.weekOfYear!
-            return "\(weeks) week\(weeks > 1 ? "s" : "") ago"
+            return "\(weeks) \(AppConstants.NewsFeedTableViewCellCreator.week)\(weeks > 1 ? "s" : "") \(AppConstants.NewsFeedTableViewCellCreator.ago)"
             
         case let comp where comp.day ?? 0 > 0:
             let days = comp.day!
-            return "\(days) day\(days > 1 ? "s" : "") ago"
+            return "\(days) \(AppConstants.NewsFeedTableViewCellCreator.day)\(days > 1 ? "s" : "") \(AppConstants.NewsFeedTableViewCellCreator.ago)"
             
         case let comp where comp.hour ?? 0 > 0:
             let hours = comp.hour!
-            return "\(hours) hour\(hours > 1 ? "s" : "") ago"
+            return "\(hours) \(AppConstants.NewsFeedTableViewCellCreator.hour)\(hours > 1 ? "s" : "") \(AppConstants.NewsFeedTableViewCellCreator.ago)"
             
         case let comp where comp.minute ?? 0 > 0:
             let minutes = comp.minute!
-            return "\(minutes) min\(minutes > 1 ? "s" : "") ago"
+            return "\(minutes) \(AppConstants.NewsFeedTableViewCellCreator.min)\(minutes > 1 ? "s" : "") \(AppConstants.NewsFeedTableViewCellCreator.ago)"
             
         default:
-            return "Just now"
+            return AppConstants.NewsFeedTableViewCellCreator.justNow
         }
     }
 }
@@ -175,14 +175,15 @@ extension NewsFeedTableViewCellCreator {
     
     private func setupSourceInfoLabel() {
         sourceInfoLabel.textColor = .lightGreyColor
-        sourceInfoLabel.font = UIFont(name: "Poppins-Light", size: 12)
+        sourceInfoLabel.font = .customFont(name: AppConstants.Fonts.poppinsLight, size: 12, textStyle: .body)
+        sourceInfoLabel.adjustsFontForContentSizeCategory = true
         sourceInfoLabel.textAlignment = .left
         sourceInfoLabel.numberOfLines = 1
         contentView.addSubview(sourceInfoLabel)
     }
     
     private func setupSaveButton() {
-        let buttonImage = UIImage(named: "bookmark")
+        let buttonImage = UIImage(named: AppConstants.ImagesNames.bookmark)
         saveButton.setImage(buttonImage, for: .normal)
         saveButton.imageView?.contentMode = .scaleAspectFit
         saveButton.tintColor = .lightGreyColor
@@ -195,7 +196,8 @@ extension NewsFeedTableViewCellCreator {
         titleLabel.textColor = .newsTextColor
         titleLabel.numberOfLines = 0
         titleLabel.lineBreakMode = .byWordWrapping
-        titleLabel.font = UIFont(name: "Poppins-SemiBold", size: 24)
+        titleLabel.font = .customFont(name: AppConstants.Fonts.poppinsSemiBold, size: 24, textStyle: .title1)
+        titleLabel.adjustsFontForContentSizeCategory = true
         contentView.addSubview(titleLabel)
     }
     

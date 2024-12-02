@@ -42,7 +42,7 @@ class ShowOnSourceNewsItemVC: UIViewController {
     // MARK: - Private methods
     
     private func updateSaveButtonUI() {
-        let buttonImage = isSaved ? UIImage(named: "bookmarkSelected") : UIImage(named: "bookmark")
+        let buttonImage = isSaved ? UIImage(named: AppConstants.ImagesNames.bookmarkSelected) : UIImage(named: AppConstants.ImagesNames.bookmark)
         saveButton.setImage(buttonImage, for: .normal)
     }
     
@@ -78,7 +78,7 @@ class ShowOnSourceNewsItemVC: UIViewController {
     }
     
     private func setupBackButton() {
-        backButton.setImage(UIImage(named: "backArrow"), for: .normal)
+        backButton.setImage(UIImage(named: AppConstants.ImagesNames.backArrow), for: .normal)
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         view.addSubview(backButton)
     }

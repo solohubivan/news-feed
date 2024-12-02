@@ -26,15 +26,16 @@ class NotificationsVC: UIViewController {
     }
     
     private func setupComingSoonLabel() {
-        comingSoonLabel.text = "Coming soon"
+        comingSoonLabel.text = AppConstants.NotificationsVC.comingSoonLabelText
         comingSoonLabel.textColor = .newsTextColor
-        comingSoonLabel.font = UIFont(name: "Poppins-SemiBold", size: 24)
+        comingSoonLabel.font = .customFont(name: AppConstants.Fonts.poppinsSemiBold, size: 24, textStyle: .title1)
+        comingSoonLabel.adjustsFontForContentSizeCategory = true
         comingSoonLabel.textAlignment = .center
         view.addSubview(comingSoonLabel)
     }
     
     private func setupWrenchImageView() {
-        wrenchImageView.image = UIImage(systemName: "wrench.fill")
+        wrenchImageView.image = UIImage(systemName: AppConstants.ImagesNames.wrenchFill)
         wrenchImageView.tintColor = .newsTextColor
         view.addSubview(wrenchImageView)
     }

@@ -85,7 +85,7 @@ extension SearchingNewsVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "NewsFeedTableViewCell", for: indexPath) as? NewsFeedTableViewCellCreator else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: AppConstants.Identifiers.newsFeedTableViewCellID, for: indexPath) as? NewsFeedTableViewCellCreator else {
             return UITableViewCell()
         }
         
@@ -124,9 +124,10 @@ extension SearchingNewsVC {
     }
     
     private func setupTitleLabel() {
-        titleLabel.text = "Search news here"
+        titleLabel.text = AppConstants.SearchingNewsVC.titleLabelText
         titleLabel.textColor = .newsTextColor
-        titleLabel.font = UIFont(name: "Poppins-Regular", size: 16)
+        titleLabel.font = .customFont(name: AppConstants.Fonts.poppinsRegular, size: 16, textStyle: .body)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textAlignment = .center
         view.addSubview(titleLabel)
     }
@@ -142,8 +143,9 @@ extension SearchingNewsVC {
         searchTF.borderStyle = .none
         searchTF.layer.cornerRadius = 10
         searchTF.layer.backgroundColor = UIColor.lightGray.cgColor
-        searchTF.font = UIFont(name: "Poppins-Regular", size: 18)
-        searchTF.placeholder = "Find news here"
+        searchTF.font = .customFont(name: AppConstants.Fonts.poppinsRegular, size: 18, textStyle: .body)
+        searchTF.adjustsFontForContentSizeCategory = true
+        searchTF.placeholder = AppConstants.SearchingNewsVC.tFPlaceholderText
         searchTF.overrideUserInterfaceStyle = .light
         placeholderIndent()
         view.addSubview(searchTF)
@@ -158,7 +160,7 @@ extension SearchingNewsVC {
     private func setupResultTableView() {
         resultTableView.delegate = self
         resultTableView.dataSource = self
-        resultTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: "NewsFeedTableViewCell")
+        resultTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: AppConstants.Identifiers.newsFeedTableViewCellID)
         resultTableView.separatorStyle = .singleLine
         resultTableView.backgroundColor = .clear
         view.addSubview(resultTableView)

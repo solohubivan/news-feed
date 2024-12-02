@@ -46,8 +46,8 @@ class RSSAtomNewsFetcher {
 
         if let atomFeed = feed.atomFeed {
             for entry in atomFeed.entries ?? [] {
-                let title = entry.title ?? "No title"
-                let sourceName = entry.authors?.first?.name ?? "Unknown Source"
+                let title = entry.title ?? ""
+                let sourceName = entry.authors?.first?.name ?? ""
                 let sourceLink = entry.links?.first?.attributes?.href ?? ""
                 let datePublished = entry.published ?? Date()
                 let content = entry.content?.value ?? ""

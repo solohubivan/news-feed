@@ -59,7 +59,7 @@ extension SavedNewsItemsVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "NewsFeedTableViewCell", for: indexPath) as? NewsFeedTableViewCellCreator else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: AppConstants.Identifiers.newsFeedTableViewCellID, for: indexPath) as? NewsFeedTableViewCellCreator else {
             return UITableViewCell()
         }
         let newsItem = newsItemsManager.getSavedItems()[indexPath.row]
@@ -100,9 +100,10 @@ extension SavedNewsItemsVC {
     }
     
     private func setupTitleLabel() {
-        titleLabel.text = "Saved"
+        titleLabel.text = AppConstants.SavedNewsItemsVC.titleLabelText
         titleLabel.textColor = .newsTextColor
-        titleLabel.font = UIFont(name: "Poppins-Regular", size: 16)
+        titleLabel.font = .customFont(name: AppConstants.Fonts.poppinsRegular, size: 16, textStyle: .body)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textAlignment = .center
         view.addSubview(titleLabel)
     }
@@ -115,7 +116,7 @@ extension SavedNewsItemsVC {
     private func setupNewsFeedTableView() {
         savedNewsItemsTableView.dataSource = self
         savedNewsItemsTableView.delegate = self
-        savedNewsItemsTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: "NewsFeedTableViewCell")
+        savedNewsItemsTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: AppConstants.Identifiers.newsFeedTableViewCellID)
         savedNewsItemsTableView.backgroundColor = .clear
         savedNewsItemsTableView.separatorStyle = .singleLine
         savedNewsItemsTableView.separatorColor = .lightGray
