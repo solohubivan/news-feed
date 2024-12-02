@@ -47,28 +47,24 @@ class NetworkMonitor {
     private func showNoInternetAlert() {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first?.rootViewController else { return }
-
         let alert = AlertFactory.noInternetAlert(
             onSettings: { },
-            onCancel: { [weak self] in
+            onUseOffline: { [weak self] in
                 self?.onUseOfflineModeAllert?()
             }
         )
-        
         rootViewController.present(alert, animated: true)
     }
     
     private func showInternetRestoredAlert() {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first?.rootViewController else { return }
-
         let alert = AlertFactory.internetRestoredAlert(
             onUseOnline: {
                 self.onUseOnlineModeAllert?()
             },
             onKeepOffline: { }
         )
-            
         rootViewController.present(alert, animated: true)
     }
 }

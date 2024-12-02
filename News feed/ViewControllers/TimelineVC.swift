@@ -33,16 +33,7 @@ class TimelineVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        
-        NetworkMonitor.shared.onUseOfflineModeAllert = { [weak self] in
-            self?.fetchCachedNewsAndUpdateTable()
-        }
-        
-        NetworkMonitor.shared.onUseOnlineModeAllert = { [weak self] in
-            self?.fetchAndDisplayInitialNews()
-            self?.scrollToTop()
-        }
-        
+        setupNetworkCallbacks()
         checkConnectionModeAndFetchData()
     }
     
@@ -123,6 +114,22 @@ class TimelineVC: UIViewController {
         let topIndexPath = IndexPath(row: 0, section: 0)
         newsFeedTableView.scrollToRow(at: topIndexPath, at: .top, animated: true)
     }
+    
+    private func setupNetworkCallbacks() {
+        NetworkMonitor.shared.onUseOfflineModeAllert = { [weak self] in
+            self?.fetchCachedNewsAndUpdateTable()
+        }
+        
+        NetworkMonitor.shared.onUseOnlineModeAllert = { [weak self] in
+            self?.fetchAndDisplayInitialNews()
+            self?.scrollToTop()
+        }
+    }
+    
+    private func showNoInternetAlertForNews() {
+        let alert = AlertFactory.noInternetForNewsAlert()
+        present(alert, animated: true, completion: nil)
+    }
 }
 
 // MARK: - UITableView delegates
@@ -160,6 +167,12 @@ extension TimelineVC: UITableViewDataSource, UITableViewDelegate {
             
         selectedNewsItem = newsItems[newsIndex]
         transitionCount += 1
+        
+        if NetworkMonitor.shared.connectionMode == .offline {
+            showNoInternetAlertForNews()
+            return
+        }
+
         
         if transitionCount % 3 == 0, let interstitialAd = interstitialAd {
             interstitialAd.present(fromRootViewController: self)

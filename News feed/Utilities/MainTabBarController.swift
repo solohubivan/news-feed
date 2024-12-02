@@ -20,21 +20,19 @@ class MainTabBarController: UITabBarController {
         tabBar.tintColor = .choosedObjectColor
         tabBar.unselectedItemTintColor = .lightGreyColor
         
-        let mainVC = TimelineVC()
-        mainVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "house"), tag: 0)
+        let timelineVC = TimelineVC()
+        timelineVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "house"), tag: 0)
         
-        let timelineVC = UIViewController()
-        timelineVC.view.backgroundColor = .greyBackGroundColor
-        timelineVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "magnifyingglass"), tag: 1)
+        let searchingNewsVC = SearchingNewsVC()
+        searchingNewsVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "magnifyingglass"), tag: 1)
 
-        let settingsVC = UIViewController()
-        settingsVC.view.backgroundColor = .greyBackGroundColor
-        settingsVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "bell"), tag: 2)
+        let notificationsVC = NotificationsVC()
+        notificationsVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "bell"), tag: 2)
 
-        let profileVC = SavedNewsItemsVC()
-        profileVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "bookmark"), tag: 3)
+        let savedNewsItemsVC = SavedNewsItemsVC()
+        savedNewsItemsVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "bookmark"), tag: 3)
         
-        viewControllers = [mainVC, timelineVC, settingsVC, profileVC]
+        viewControllers = [timelineVC, searchingNewsVC, notificationsVC, savedNewsItemsVC]
     }
 
     private func addTopBorderToTabBar() {

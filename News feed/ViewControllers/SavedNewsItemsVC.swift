@@ -17,6 +17,8 @@ class SavedNewsItemsVC: UIViewController {
     
     private var savedNewsItems: [NewsItem] = []
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -29,16 +31,24 @@ class SavedNewsItemsVC: UIViewController {
         savedNewsItemsTableView.reloadData()
     }
     
-    private func setupRefreshControl() {
-        refreshControl.addTarget(self, action: #selector(refreshTableView), for: .valueChanged)
-        savedNewsItemsTableView.refreshControl = refreshControl
-    }
+    // MARK: - Actions
         
     @objc private func refreshTableView() {
         savedNewsItemsTableView.reloadData()
         refreshControl.endRefreshing()
     }
     
+    // MARK: - Private methods
+    
+    private func setupRefreshControl() {
+        refreshControl.addTarget(self, action: #selector(refreshTableView), for: .valueChanged)
+        savedNewsItemsTableView.refreshControl = refreshControl
+    }
+    
+    private func showNoInternetAlertForNews() {
+        let alert = AlertFactory.noInternetForNewsAlert()
+        present(alert, animated: true, completion: nil)
+    }
 }
 
 // MARK: - UITableView delegates
@@ -64,6 +74,11 @@ extension SavedNewsItemsVC: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        if NetworkMonitor.shared.connectionMode == .offline {
+            showNoInternetAlertForNews()
+            return
+        }
         
         let vk = ShowOnSourceNewsItemVC()
         let newsItem = newsItemsManager.getSavedItems()[indexPath.row]

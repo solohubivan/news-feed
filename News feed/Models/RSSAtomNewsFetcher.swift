@@ -87,38 +87,3 @@ class RSSAtomNewsFetcher {
         return ""
     }
 }
-
-
-//    private func parseFeed(_ feed: Feed) {
-//        newsItems = []
-//
-//        if let atomFeed = feed.atomFeed {
-//            for entry in atomFeed.entries ?? [] {
-//                let title = entry.title ?? "No title"
-//                let sourceName = entry.authors?.first?.name ?? "Unknown Source"
-//                let sourceLink = entry.links?.first?.attributes?.href ?? ""
-//                let datePublished = entry.published ?? Date()
-//                let content = entry.content?.value ?? ""
-//                let imageUrl = extractImageUrl(from: content)
-//
-//                var imageData: Data? = nil
-//                if !imageUrl.isEmpty, let url = URL(string: imageUrl) {
-//                    imageData = try? Data(contentsOf: url)
-//                }
-//
-//                let newsItem = NewsItem(
-//                    title: title,
-//                    imageUrl: imageUrl,
-//                    imageData: imageData,
-//                    sourceName: sourceName,
-//                    datePublished: datePublished,
-//                    sourceLink: sourceLink
-//                )
-//                newsItems.append(newsItem)
-//
-//                if let id = entry.id {
-//                    lastNewsID = id
-//                }
-//            }
-//        }
-//    }

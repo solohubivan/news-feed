@@ -9,7 +9,7 @@ import UIKit
 
 class AlertFactory {
     
-    static func noInternetAlert(onSettings: @escaping () -> Void, onCancel: @escaping () -> Void) -> UIAlertController {
+    static func noInternetAlert(onSettings: @escaping () -> Void, onUseOffline: @escaping () -> Void) -> UIAlertController {
         let alert = UIAlertController(
             title: "No internet connection",
             message: "Please enable internet access or use the app in offline mode.",
@@ -26,7 +26,7 @@ class AlertFactory {
         }
         
         let cancelAction = UIAlertAction(title: "Use offline mode", style: .cancel) { _ in
-            onCancel()
+            onUseOffline()
         }
         
         alert.addAction(settingsAction)
@@ -53,6 +53,20 @@ class AlertFactory {
         alert.addAction(useOnlineAction)
         alert.addAction(keepOfflineAction)
             
+        return alert
+    }
+    
+    static func noInternetForNewsAlert(onOk: (() -> Void)? = nil) -> UIAlertController {
+        let alert = UIAlertController(
+            title: "No internet connection",
+            message: "We suggest adding the news to your saved items and viewing it in detail once an internet connection is established.",
+            preferredStyle: .alert
+        )
+            
+        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+            onOk?()
+        }
+        alert.addAction(okAction)
         return alert
     }
 }

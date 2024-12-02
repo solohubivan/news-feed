@@ -63,11 +63,7 @@ class NewsFeedCreator {
     }
     
     func fetchMoreNews(completion: @escaping () -> Void) {
-        guard !preparedNewsItems.isEmpty else {
-            print("No more news available in preparedNewsItems")
-//            completion()
-            return
-        }
+        guard !preparedNewsItems.isEmpty else { return }
         let uniqueNewsItems = preparedNewsItems.filter { item in
             !combinedNewsItems.contains(where: { $0.title == item.title })
         }
@@ -75,25 +71,19 @@ class NewsFeedCreator {
         preparedNewsItems.sort { $0.datePublished > $1.datePublished }
         combinedNewsItems.append(contentsOf: preparedNewsItems)
         preparedNewsItems.removeAll()
-        
-//        let cachedNews = NewsItemsCacheManager.shared.loadAllFromCache()
-//        print(cachedNews.count)
-        
-        
+
         completion()
     }
     
     func fetchNewsFromCache(completion: @escaping () -> Void) {
         combinedNewsItems.removeAll()
-        
         let cachedNews = NewsItemsCacheManager.shared.loadAllFromCache()
         let sortedCachedNews = cachedNews.sorted { $0.datePublished > $1.datePublished }
-        
         combinedNewsItems.append(contentsOf: sortedCachedNews)
-        
-        print("Loaded \(combinedNewsItems.count) news items from cache.")
         completion()
     }
+    
+    // MARK: - Private methods
     
     private func removeDuplicates(from news: [NewsItem]) -> [NewsItem] {
         var seenItems: [(String, Date)] = []

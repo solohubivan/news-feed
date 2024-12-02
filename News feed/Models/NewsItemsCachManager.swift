@@ -15,7 +15,6 @@ class NewsItemsCacheManager {
     private let context = CoreDataStack.shared.context
     
     private var savedItems: [NewsItem] = []
-    private var cachedItems: [NewsItem] = []
 
     private init() {
         loadSavedItems()
@@ -89,21 +88,19 @@ class NewsItemsCacheManager {
                                         cachedNewsItem.imageData = data
                                         do {
                                             try self.context.save()
-                                            print("Image saved for \(item.title)")
-                                        } catch let saveError {
-                                            print("Failed to save image data: \(saveError.localizedDescription)")
+                                        } catch _ {
                                         }
                                     }
-                                case .failure(let error):
-                                    print("Failed to download image: \(error.localizedDescription)")
+                                case .failure(_):
+                                    break
                                 }
                             }
                         } else {
                             cachedNewsItem.imageData = nil
                         }
                     }
-                } catch let fetchError {
-                    print("Failed to fetch cached news: \(fetchError.localizedDescription)")
+                } catch _ {
+
                 }
             }
         }
@@ -124,7 +121,7 @@ class NewsItemsCacheManager {
                 )
             }
         } catch {
-            print("Failed to load cached news: \(error.localizedDescription)")
+
             return []
         }
     }
@@ -147,7 +144,7 @@ class NewsItemsCacheManager {
                 )
             }
         } catch {
-            print("Failed to load saved items: \(error.localizedDescription)")
+
         }
     }
 }
