@@ -7,7 +7,7 @@
 
 import Foundation
 
-class NewsFeedCreator {
+class NewsFeedManager {
 
     private let rssNewsFetcher = RSSNewsFetcher()
     private let atomNewsFetcher = RSSAtomNewsFetcher()
@@ -31,21 +31,21 @@ class NewsFeedCreator {
         let dispatchGroup = DispatchGroup()
         
         dispatchGroup.enter()
-        rssNewsFetcher.fetchRSSNews(from: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml") {
+        rssNewsFetcher.fetchRSSNews(from: NewsFeedLinks.nytimes) {
             nytimes = self.rssNewsFetcher.getNewsItems()
             self.preparedNewsItems.append(contentsOf: nytimes)
             dispatchGroup.leave()
         }
 
         dispatchGroup.enter()
-        rssNewsFetcher.fetchRSSNews(from: "https://www.theguardian.com/world/rss") {
+        rssNewsFetcher.fetchRSSNews(from: NewsFeedLinks.theGuardian) {
             theGuardian = self.rssNewsFetcher.getNewsItems()
             self.preparedNewsItems.append(contentsOf: theGuardian)
             dispatchGroup.leave()
         }
 
         dispatchGroup.enter()
-        atomNewsFetcher.fetchNews(from: "https://www.reddit.com/.rss?limit=100") {
+        atomNewsFetcher.fetchNews(from: NewsFeedLinks.reddit) {
             reddit = self.atomNewsFetcher.getNewsItems()
             self.preparedNewsItems.append(contentsOf: reddit)
             dispatchGroup.leave()

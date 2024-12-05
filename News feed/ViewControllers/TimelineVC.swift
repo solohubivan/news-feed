@@ -16,7 +16,7 @@ class TimelineVC: UIViewController {
     private var newsFeedTableView = UITableView()
     private let refreshControl = UIRefreshControl()
     
-    private let newsFeedCreator = NewsFeedCreator()
+    private let newsFeedManager = NewsFeedManager()
     private let newsItemsManager = NewsItemsCacheManager.shared
 
     private var bannerView: GADBannerView?
@@ -65,10 +65,10 @@ class TimelineVC: UIViewController {
     }
     
     private func fetchAndDisplayInitialNews() {
-        newsFeedCreator.fetchInitialNews { [weak self] in
+        newsFeedManager.fetchInitialNews { [weak self] in
             DispatchQueue.main.async {
                 self?.newsItems.removeAll()
-                self?.newsItems = self?.newsFeedCreator.getCombinedNewsItems() ?? []
+                self?.newsItems = self?.newsFeedManager.getCombinedNewsItems() ?? []
                 self?.newsFeedTableView.reloadData()
                 self?.refreshControl.endRefreshing()
                 self?.bannerView?.isHidden = false
@@ -81,10 +81,10 @@ class TimelineVC: UIViewController {
     }
     
     private func fetchCachedNewsAndUpdateTable() {
-        newsFeedCreator.fetchNewsFromCache { [weak self] in
+        newsFeedManager.fetchNewsFromCache { [weak self] in
             DispatchQueue.main.async {
                 self?.newsItems.removeAll()
-                self?.newsItems = self?.newsFeedCreator.getCombinedNewsItems() ?? []
+                self?.newsItems = self?.newsFeedManager.getCombinedNewsItems() ?? []
                 self?.newsFeedTableView.reloadData()
                 self?.refreshControl.endRefreshing()
                 self?.bannerView?.isHidden = true
@@ -93,10 +93,10 @@ class TimelineVC: UIViewController {
     }
 
     private func loadMoreNews() {
-        newsFeedCreator.fetchMoreNews { [weak self] in
+        newsFeedManager.fetchMoreNews { [weak self] in
             DispatchQueue.main.async {
                 self?.newsItems.removeAll()
-                self?.newsItems = self?.newsFeedCreator.getCombinedNewsItems() ?? []
+                self?.newsItems = self?.newsFeedManager.getCombinedNewsItems() ?? []
                 self?.newsFeedTableView.reloadData()
             }
         }
