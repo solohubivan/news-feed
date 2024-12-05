@@ -9,8 +9,8 @@ import Foundation
 
 class NewsFeedManager {
 
-    private let rssNewsFetcher = RSSNewsFetcher()
-    private let atomNewsFetcher = RSSAtomNewsFetcher()
+    private let rssNewsFetcher = RSSNewsService()
+    private let atomNewsFetcher = RSSAtomNewsService()
     private var combinedNewsItems: [NewsItem] = []
     private var preparedNewsItems: [NewsItem] = []
 

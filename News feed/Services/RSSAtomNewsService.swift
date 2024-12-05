@@ -71,19 +71,6 @@ class RSSAtomNewsService {
     }
 
     private func extractImageUrl(from content: String) -> String {
-        let pattern = #"img src="([^"]+)""#
-        if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
-            let range = NSRange(location: 0, length: content.utf16.count)
-            if let match = regex.firstMatch(in: content, options: [], range: range) {
-                if let imageUrlRange = Range(match.range(at: 1), in: content) {
-                    var imageUrl = String(content[imageUrlRange])
-                    imageUrl = imageUrl.replacingOccurrences(of: "&amp;", with: "&")
-                    if URL(string: imageUrl) != nil {
-                        return imageUrl
-                    }
-                }
-            }
-        }
-        return ""
+        return ImageUrlParserService.extractImageUrlFromDescription(content) ?? ""
     }
 }

@@ -61,60 +61,63 @@ class RSSNewsService {
                 )
                 newsItems.append(newsItem)
             }
-        } else {
-            
         }
     }
     
     private func getSourceName(from item: RSSFeedItem) -> String {
-        if let feedSource = item.source?.value, !feedSource.isEmpty {
-            return feedSource.lowercased()
-        }
-        
-        if let link = item.link, let url = URL(string: link) {
+        guard let feedSource = item.source?.value, !feedSource.isEmpty else {
+            guard let link = item.link, let url = URL(string: link) else { return "" }
             return url.host?
                 .replacingOccurrences(of: "www.", with: "")
                 .components(separatedBy: ".")
                 .first?
                 .lowercased() ?? ""
         }
+        return feedSource.lowercased()
+    }
+
+    private func extractHighQualityImageUrl(from mediaContents: [MediaContent], thumbnail: [MediaThumbnail], description: String) -> String {
+ 
+        let sources: [(String?)] = [
+            extractImageUrlFromMediaContents(mediaContents),
+            extractImageUrlFromThumbnails(thumbnail),
+            extractImageUrlFromDescription(description)
+        ]
+
+        for source in sources {
+            switch source {
+            case let url? where !url.isEmpty:
+                return url
+            default:
+                continue
+            }
+        }
         
         return ""
     }
 
-    private func extractHighQualityImageUrl(from mediaContents: [MediaContent], thumbnail: [MediaThumbnail], description: String) -> String {
-        
-        let sortedMediaContents = mediaContents.sorted { ($0.attributes?.width ?? 0) > ($1.attributes?.width ?? 0) }
-        for mediaContent in sortedMediaContents {
-            if let url = mediaContent.attributes?.url, URL(string: url) != nil {
-                return url
-            }
+    // MARK: - Helper Methods
+
+    private func extractImageUrlFromMediaContents(_ mediaContents: [MediaContent]) -> String? {
+        for mediaContent in mediaContents.sorted(by: { ($0.attributes?.width ?? 0) > ($1.attributes?.width ?? 0) }) {
+            guard let url = mediaContent.attributes?.url, URL(string: url) != nil else { continue }
+            return url
         }
-        
-        let sortedThumbnails = thumbnail.sorted {
+        return nil
+    }
+
+    private func extractImageUrlFromThumbnails(_ thumbnails: [MediaThumbnail]) -> String? {
+        for thumbnail in thumbnails.sorted(by: {
             (Int($0.attributes?.width ?? "") ?? 0) > (Int($1.attributes?.width ?? "") ?? 0)
+        }) {
+            guard let url = thumbnail.attributes?.url, URL(string: url) != nil else { continue }
+            return url
         }
-        for thumbnail in sortedThumbnails {
-            if let url = thumbnail.attributes?.url, URL(string: url) != nil {
-                return url
-            }
-        }
-        
-        let pattern = #"img src="([^"]+)""#
-        if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
-            let range = NSRange(location: 0, length: description.utf16.count)
-            if let match = regex.firstMatch(in: description, options: [], range: range) {
-                if let imageUrlRange = Range(match.range(at: 1), in: description) {
-                    var imageUrl = String(description[imageUrlRange])
-                    imageUrl = imageUrl.replacingOccurrences(of: "&amp;", with: "&")
-                    
-                    if URL(string: imageUrl) != nil {
-                        return imageUrl
-                    }
-                }
-            }
-        }
-        
-        return ""
+        return nil
+    }
+
+    private func extractImageUrlFromDescription(_ description: String) -> String? {
+        return ImageUrlParserService.extractImageUrlFromDescription(description)
     }
 }
+
