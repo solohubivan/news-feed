@@ -15,8 +15,8 @@ class NewsItemsCacheManager {
     private let context = CoreDataStack.shared.context
     
     private var savedItems: [NewsItem] = []
-
-    private init() {
+    
+    init() {
         loadSavedItems()
     }
     

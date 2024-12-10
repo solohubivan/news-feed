@@ -78,12 +78,14 @@ class ShowOnSourceNewsItemVC: UIViewController {
     }
     
     private func setupBackButton() {
+        backButton.accessibilityIdentifier = "BackButtonArrow"
         backButton.setImage(UIImage(named: AppConstants.ImagesNames.backArrow), for: .normal)
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         view.addSubview(backButton)
     }
     
     private func setupSaveButton() {
+        saveButton.accessibilityIdentifier = "SaveButton"
         saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         view.addSubview(saveButton)
     }
@@ -94,6 +96,7 @@ class ShowOnSourceNewsItemVC: UIViewController {
     }
     
     private func setupWebView() {
+        webView.accessibilityIdentifier = "WebView"
         webView.navigationDelegate = self
         webView.backgroundColor = .clear
         webView.alpha = 0

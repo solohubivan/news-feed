@@ -20,17 +20,23 @@ class MainTabBarController: UITabBarController {
         tabBar.tintColor = .choosedObjectColor
         tabBar.unselectedItemTintColor = .lightGreyColor
         
+        tabBar.accessibilityIdentifier = "MainTabBar"
+        
         let timelineVC = TimelineVC()
         timelineVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: AppConstants.ImagesNames.house), tag: 0)
+        timelineVC.tabBarItem.accessibilityIdentifier = "TimelineTabBarItem"
         
         let searchingNewsVC = SearchingNewsVC()
         searchingNewsVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: AppConstants.ImagesNames.magnifyingglass), tag: 1)
+        searchingNewsVC.tabBarItem.accessibilityIdentifier = "SearchingNewsTabBarItem"
 
         let notificationsVC = NotificationsVC()
         notificationsVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: AppConstants.ImagesNames.bell), tag: 2)
+        notificationsVC.tabBarItem.accessibilityIdentifier = "NotificationsTabBarItem"
 
         let savedNewsItemsVC = SavedNewsItemsVC()
         savedNewsItemsVC.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: AppConstants.ImagesNames.bookmark), tag: 3)
+        savedNewsItemsVC.tabBarItem.accessibilityIdentifier = "SavedNewsItemsTabBarItem"
         
         viewControllers = [timelineVC, searchingNewsVC, notificationsVC, savedNewsItemsVC]
     }

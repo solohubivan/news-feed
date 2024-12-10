@@ -83,6 +83,11 @@ class NewsFeedManager {
         completion()
     }
     
+    func injectInitialData(combined: [NewsItem], prepared: [NewsItem]) {
+        self.combinedNewsItems = combined
+        self.preparedNewsItems = prepared
+    }
+    
     // MARK: - Private methods
     
     private func removeDuplicates(from news: [NewsItem]) -> [NewsItem] {
