@@ -100,7 +100,7 @@ extension SavedNewsItemsVC {
     }
     
     private func setupTitleLabel() {
-        titleLabel.accessibilityIdentifier = "SaveNewsItemsVCTitleLabel"
+        titleLabel.accessibilityIdentifier = AppConstants.ObjectsIdentifiers.saveNewsItemsVCTitleLabelId
         titleLabel.text = AppConstants.SavedNewsItemsVC.titleLabelText
         titleLabel.textColor = .newsTextColor
         titleLabel.font = .customFont(name: AppConstants.Fonts.poppinsRegular, size: 16, textStyle: .body)
@@ -115,7 +115,7 @@ extension SavedNewsItemsVC {
     }
     
     private func setupNewsFeedTableView() {
-        savedNewsItemsTableView.accessibilityIdentifier = "SaveNewsItemsVCTableView"
+        savedNewsItemsTableView.accessibilityIdentifier = AppConstants.ObjectsIdentifiers.saveNewsItemsVCTableViewId
         savedNewsItemsTableView.dataSource = self
         savedNewsItemsTableView.delegate = self
         savedNewsItemsTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: AppConstants.Identifiers.newsFeedTableViewCellID)

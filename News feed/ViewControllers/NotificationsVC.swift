@@ -26,7 +26,7 @@ class NotificationsVC: UIViewController {
     }
     
     private func setupComingSoonLabel() {
-        comingSoonLabel.accessibilityIdentifier = "MockLabel"
+        comingSoonLabel.accessibilityIdentifier = AppConstants.ObjectsIdentifiers.mockLabelId
         comingSoonLabel.text = AppConstants.NotificationsVC.comingSoonLabelText
         comingSoonLabel.textColor = .newsTextColor
         comingSoonLabel.font = .customFont(name: AppConstants.Fonts.poppinsSemiBold, size: 24, textStyle: .title1)

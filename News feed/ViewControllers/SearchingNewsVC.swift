@@ -124,7 +124,7 @@ extension SearchingNewsVC {
     }
     
     private func setupTitleLabel() {
-        titleLabel.accessibilityIdentifier = "TitleLabel"
+        titleLabel.accessibilityIdentifier = AppConstants.ObjectsIdentifiers.searchingNewsVCTitleLabelId
         titleLabel.text = AppConstants.SearchingNewsVC.titleLabelText
         titleLabel.textColor = .newsTextColor
         titleLabel.font = .customFont(name: AppConstants.Fonts.poppinsRegular, size: 16, textStyle: .body)
@@ -139,7 +139,7 @@ extension SearchingNewsVC {
     }
     
     private func setupSearchTF() {
-        searchTF.accessibilityIdentifier = "SearchTF"
+        searchTF.accessibilityIdentifier = AppConstants.ObjectsIdentifiers.searchTFId
         searchTF.delegate = self
         searchTF.clearButtonMode = .whileEditing
         searchTF.borderStyle = .none

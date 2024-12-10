@@ -230,7 +230,7 @@ extension TimelineVC {
     }
     
     private func setupTitleLabel() {
-        titleLabel.accessibilityIdentifier = "MainTitleLabel"
+        titleLabel.accessibilityIdentifier = AppConstants.ObjectsIdentifiers.timelineVCMainTitleLabelId
         titleLabel.text = AppConstants.TimelineVC.titleLabelText
         titleLabel.textColor = .newsTextColor
         titleLabel.font = .customFont(name: AppConstants.Fonts.poppinsRegular, size: 16, textStyle: .body)
@@ -240,13 +240,13 @@ extension TimelineVC {
     }
     
     private func setupSeparateLine() {
-        separateLine.accessibilityIdentifier = "SeparateLine"
+        separateLine.accessibilityIdentifier = AppConstants.ObjectsIdentifiers.timelineVCseparateLineId
         separateLine.backgroundColor = .lightGreyColor
         view.addSubview(separateLine)
     }
     
     private func setupNewsFeedTableView() {
-        newsFeedTableView.accessibilityIdentifier = "TimelineTableView"
+        newsFeedTableView.accessibilityIdentifier = AppConstants.ObjectsIdentifiers.timelineVCTableViewId
         newsFeedTableView.dataSource = self
         newsFeedTableView.delegate = self
         newsFeedTableView.register(NewsFeedTableViewCellCreator.self, forCellReuseIdentifier: AppConstants.Identifiers.newsFeedTableViewCellID)

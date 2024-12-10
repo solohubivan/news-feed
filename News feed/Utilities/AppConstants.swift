@@ -69,4 +69,23 @@ enum AppConstants {
         static let messageNoInternetConnection = "We suggest adding the news to your saved items and viewing it in detail once an internet connection is established."
         static let oKButtonText = "OK"
     }
+    
+    enum ObjectsIdentifiers {
+        static let timelineVCMainTitleLabelId = "MainTitleLabel"
+        static let timelineVCseparateLineId = "SeparateLine"
+        static let timelineVCTableViewId = "TimelineTableView"
+        static let backButtonArrowId = "BackButtonArrow"
+        static let saveButtonId = "SaveButton"
+        static let webViewId = "WebView"
+        static let searchingNewsVCTitleLabelId = "TitleLabel"
+        static let searchTFId = "SearchTF"
+        static let saveNewsItemsVCTitleLabelId = "SaveNewsItemsVCTitleLabel"
+        static let saveNewsItemsVCTableViewId = "SaveNewsItemsVCTableView"
+        static let mockLabelId = "MockLabel"
+        static let mainTabBarId = "MainTabBar"
+        static let timelineTabBarItemId = "TimelineTabBarItem"
+        static let searchingNewsTabBarItemId = "SearchingNewsTabBarItem"
+        static let notificationsTabBarItemId = "NotificationsTabBarItem"
+        static let savedNewsItemsTabBarItemId = "SavedNewsItemsTabBarItem"
+    }
 }
